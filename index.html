@@ -81,7 +81,7 @@
             const container = document.getElementById('empresaCheckboxes');
             empresas.forEach(empresa => {
                 const checkbox = document.createElement('label');
-                checkbox.innerHTML = <input type="checkbox" value="${empresa}" checked> ${empresa};
+                checkbox.innerHTML = '<input type="checkbox" value="${empresa}" checked> ${empresa}';
                 container.appendChild(checkbox);
                 container.appendChild(document.createElement('br'));
             });
