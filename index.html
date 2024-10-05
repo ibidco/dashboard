@@ -120,6 +120,9 @@
                 }));
             });
 
+            // Filtrado de datasets para evitar duplicados
+            const filteredDatasets = datasets.filter(dataset => dataset.data.some(value => value > 0));
+
             const ctx = document.getElementById('myChart').getContext('2d');
             if (myChart) {
                 myChart.destroy();
@@ -128,7 +131,7 @@
                 type: 'bar',
                 data: {
                     labels: labels,
-                    datasets: datasets
+                    datasets: filteredDatasets // Usa el array filtrado
                 },
                 options: {
                     responsive: true,
