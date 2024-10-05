@@ -6,8 +6,26 @@
     <title>Gráfica de Ingresos, EBITDA y Utilidad Neta</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
         #controls {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
+        }
+
+        label {
+            margin-right: 10px;
         }
     </style>
 </head>
@@ -29,31 +47,29 @@
     <canvas id="myChart" width="400" height="200"></canvas>
 
     <script>
-        const url = 'https://raw.githubusercontent.com/ibidco/dashboard/main/datos.json'; // Cambia esto
+        const url = 'https://raw.githubusercontent.com/ibidco/dashboard/main/datos.json'; // Reemplaza con tu URL
         let datos = [];
         let empresas = [];
         let periodos = [];
-        let myChart; // Declarar la variable aquí
+        let myChart;
 
-        // Cargar los datos JSON
         fetch(url)
             .then(response => response.json())
             .then(data => {
-                // Convertir los datos en el formato adecuado
                 datos = data.map(item => ({
-                    empresa: item.Empresa,  // string
-                    periodo: item.Periodo,  // string
-                    año: item.Año,          // integer
-                    id: item.ID,            // string
-                    sector: item.Sector,    // string
-                    subsector: item.Subsector, // string
-                    ingresos: parseInt(item.Ingresos, 10), // integer
-                    costos: parseInt(item.Costos, 10), // integer
-                    utilidadBruta: parseInt(item["Utilidad bruta"], 10), // integer
-                    ebitda: parseFloat(item.EBITDA.replace(',', '.')) || 0, // float
-                    utilidadNeta: parseInt(item["Utilidad neta"], 10) // integer
+                    empresa: item.Empresa,
+                    periodo: item.Periodo,
+                    año: item.Año,
+                    id: item.ID,
+                    sector: item.Sector,
+                    subsector: item.Subsector,
+                    ingresos: parseInt(item.Ingresos, 10),
+                    costos: parseInt(item.Costos, 10),
+                    utilidadBruta: parseInt(item["Utilidad bruta"], 10),
+                    ebitda: parseFloat(item.EBITDA) || 0,
+                    utilidadNeta: parseInt(item["Utilidad neta"], 10)
                 }));
-                
+
                 empresas = [...new Set(datos.map(item => item.empresa))];
                 periodos = [...new Set(datos.map(item => item.periodo))];
                 renderEmpresaCheckboxes();
@@ -67,7 +83,7 @@
                 const checkbox = document.createElement('label');
                 checkbox.innerHTML = `<input type="checkbox" value="${empresa}" checked> ${empresa}`;
                 container.appendChild(checkbox);
-                container.appendChild(document.createElement('br')); // Añadir un salto de línea
+                container.appendChild(document.createElement('br'));
             });
         }
 
@@ -75,6 +91,11 @@
             const selectedEmpresas = Array.from(document.querySelectorAll('#empresaCheckboxes input:checked')).map(checkbox => checkbox.value);
             const selectedColumns = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(checkbox => checkbox.value);
             
+            if (selectedEmpresas.length === 0 || selectedColumns.length === 0) {
+                alert('Por favor, selecciona al menos una empresa y una columna.');
+                return;
+            }
+
             const ingresosPorPeriodo = {};
             periodos.forEach(periodo => {
                 ingresosPorPeriodo[periodo] = {};
@@ -101,7 +122,7 @@
 
             const ctx = document.getElementById('myChart').getContext('2d');
             if (myChart) {
-                myChart.destroy(); // Destruir el gráfico anterior
+                myChart.destroy();
             }
             myChart = new Chart(ctx, {
                 type: 'bar',
