@@ -3,128 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gráfica de Datos</title>
+    <title>Gráfica de Ingresos por Empresa y Periodo</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-        canvas {
-            max-width: 600px;
-            margin: 20px auto;
-        }
-    </style>
 </head>
 <body>
+    <h1>Gráfica de Ingresos por Empresa y Periodo</h1>
+    <canvas id="myChart" width="400" height="200"></canvas>
 
-<header>
-    <h1>Gráfica de Datos por Periodo y Empresa</h1>
-</header>
+    <script>
+        // URL del archivo JSON en GitHub
+        const url = 'https://raw.githubusercontent.com/ibidco/dashboard/main/datos.json';
 
-<div>
-    <h3>Selecciona las empresas:</h3>
-    <label><input type="checkbox" value="Bavaria" checked> Bavaria</label>
-    <label><input type="checkbox" value="Postobon"> Postobon</label>
-</div>
+        // Cargar los datos JSON
+        fetch(url)
+            .then(response => response.json())
+            .then(datos => {
+                // Agrupar datos por periodo y empresa
+                const empresas = [...new Set(datos.map(item => item.Empresa))];
+                const periodos = [...new Set(datos.map(item => item.Periodo))];
 
-<div>
-    <h3>Selecciona las métricas:</h3>
-    <label><input type="checkbox" value="Ingresos" checked> Ingresos</label>
-    <label><input type="checkbox" value="Costos"> Costos</label>
-    <label><input type="checkbox" value="Utilidad bruta"> Utilidad bruta</label>
-    <label><input type="checkbox" value="EBITDA"> EBITDA</label>
-    <label><input type="checkbox" value="Utilidad neta"> Utilidad neta</label>
-</div>
-
-<canvas id="datosChart"></canvas>
-
-<script>
-    const jsonDataUrl = "https://ibidco.github.io/dashboard/datos.json";
-
-    let datosChart; // Declarar la variable fuera de la función
-
-    // Función para cargar datos y crear la gráfica
-    function loadChart() {
-        const selectedCompanies = Array.from(document.querySelectorAll('input[type="checkbox"][value="Bavaria"], input[type="checkbox"][value="Postobon"]:checked'))
-                                       .map(cb => cb.value);
-        if (selectedCompanies.length === 0) return; // No hay empresas seleccionadas
-
-        fetch(jsonDataUrl)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Error en la red: ' + response.statusText);
-                }
-                return response.json();
-            })
-            .then(data => {
-                const filteredData = data.filter(d => selectedCompanies.includes(d.Empresa));
-                const periodos = [...new Set(filteredData.map(d => d.Periodo))]; // Obtener periodos únicos
-                
-                // Obtener las métricas seleccionadas
-                const selectedMetrics = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
-                const datasets = selectedMetrics.map(metric => {
-                    return {
-                        label: metric,
-                        data: periodos.map(periodo => {
-                            const total = filteredData
-                                .filter(d => d.Periodo === periodo)
-                                .reduce((sum, d) => sum + d[metric], 0); // Sumar valores de la métrica seleccionada
-                            return total;
-                        }),
-                        backgroundColor: getRandomColor()
-                    };
+                const ingresosPorPeriodo = {};
+                periodos.forEach(periodo => {
+                    ingresosPorPeriodo[periodo] = {};
+                    empresas.forEach(empresa => {
+                        const ingreso = datos.find(item => item.Periodo === periodo && item.Empresa === empresa);
+                        ingresosPorPeriodo[periodo][empresa] = ingreso ? ingreso.Ingresos : 0;
+                    });
                 });
 
-                const ctx = document.getElementById('datosChart').getContext('2d');
+                // Preparar los datos para Chart.js
+                const labels = periodos;
+                const datasets = empresas.map(empresa => ({
+                    label: empresa,
+                    data: periodos.map(periodo => ingresosPorPeriodo[periodo][empresa]),
+                    backgroundColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.5)`,
+                    borderColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 1)`,
+                    borderWidth: 1
+                }));
 
-                // Limpiamos la gráfica anterior si existe
-                if (datosChart) {
-                    datosChart.destroy();
-                }
-
-                // Creamos la nueva gráfica
-                datosChart = new Chart(ctx, {
+                // Crear la gráfica
+                const ctx = document.getElementById('myChart').getContext('2d');
+                new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: periodos,
+                        labels: labels,
                         datasets: datasets
                     },
                     options: {
+                        responsive: true,
                         scales: {
                             y: {
-                                beginAtZero: true
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Ingresos'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Periodo'
+                                }
                             }
                         }
                     }
                 });
             })
             .catch(error => console.error('Error al cargar los datos:', error));
-    }
-
-    // Función para obtener colores aleatorios
-    function getRandomColor() {
-        const letters = '0123456789ABCDEF';
-        let color = '#';
-        for (let i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
-        }
-        return color;
-    }
-
-    // Cargar la gráfica inicial
-    loadChart();
-
-    // Cambiar la gráfica cuando se seleccionan/deseleccionan empresas
-    document.querySelectorAll('input[type="checkbox"][value="Bavaria"], input[type="checkbox"][value="Postobon"]').forEach(checkbox => {
-        checkbox.addEventListener('change', loadChart);
-    });
-
-    // Cambiar la gráfica cuando se seleccionan/deseleccionan métricas
-    document.querySelectorAll('input[type="checkbox"]:not([value="Bavaria"]), input[type="checkbox"]:not([value="Postobon"])').forEach(checkbox => {
-        checkbox.addEventListener('change', loadChart);
-    });
-</script>
-
+    </script>
 </body>
 </html>
