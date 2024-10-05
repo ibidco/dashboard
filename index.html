@@ -11,7 +11,7 @@
             text-align: center;
         }
         canvas {
-            max-width: 900px;
+            max-width: 600px;
             margin: 20px auto;
         }
     </style>
@@ -22,11 +22,11 @@
     <h1>Gráfica de Datos por Periodo y Empresa</h1>
 </header>
 
-<label for="empresaSelect">Selecciona una empresa:</label>
-<select id="empresaSelect">
-    <option value="Bavaria">Bavaria</option>
-    <option value="Postobon">Postobon</option>
-</select>
+<div>
+    <h3>Selecciona las empresas:</h3>
+    <label><input type="checkbox" value="Bavaria" checked> Bavaria</label>
+    <label><input type="checkbox" value="Postobon"> Postobon</label>
+</div>
 
 <div>
     <h3>Selecciona las métricas:</h3>
@@ -45,7 +45,11 @@
     let datosChart; // Declarar la variable fuera de la función
 
     // Función para cargar datos y crear la gráfica
-    function loadChart(empresa) {
+    function loadChart() {
+        const selectedCompanies = Array.from(document.querySelectorAll('input[type="checkbox"][value="Bavaria"], input[type="checkbox"][value="Postobon"]:checked'))
+                                       .map(cb => cb.value);
+        if (selectedCompanies.length === 0) return; // No hay empresas seleccionadas
+
         fetch(jsonDataUrl)
             .then(response => {
                 if (!response.ok) {
@@ -54,15 +58,20 @@
                 return response.json();
             })
             .then(data => {
-                const filteredData = data.filter(d => d.Empresa === empresa);
-                const periodos = filteredData.map(d => d.Periodo);
+                const filteredData = data.filter(d => selectedCompanies.includes(d.Empresa));
+                const periodos = [...new Set(filteredData.map(d => d.Periodo))]; // Obtener periodos únicos
                 
                 // Obtener las métricas seleccionadas
                 const selectedMetrics = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
                 const datasets = selectedMetrics.map(metric => {
                     return {
                         label: metric,
-                        data: filteredData.map(d => d[metric]),
+                        data: periodos.map(periodo => {
+                            const total = filteredData
+                                .filter(d => d.Periodo === periodo)
+                                .reduce((sum, d) => sum + d[metric], 0); // Sumar valores de la métrica seleccionada
+                            return total;
+                        }),
                         backgroundColor: getRandomColor()
                     };
                 });
@@ -104,18 +113,16 @@
     }
 
     // Cargar la gráfica inicial
-    loadChart("Bavaria");
+    loadChart();
 
-    // Cambiar la gráfica cuando se selecciona una empresa diferente
-    document.getElementById('empresaSelect').addEventListener('change', (event) => {
-        loadChart(event.target.value);
+    // Cambiar la gráfica cuando se seleccionan/deseleccionan empresas
+    document.querySelectorAll('input[type="checkbox"][value="Bavaria"], input[type="checkbox"][value="Postobon"]').forEach(checkbox => {
+        checkbox.addEventListener('change', loadChart);
     });
 
     // Cambiar la gráfica cuando se seleccionan/deseleccionan métricas
-    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-            loadChart(document.getElementById('empresaSelect').value);
-        });
+    document.querySelectorAll('input[type="checkbox"]:not([value="Bavaria"]), input[type="checkbox"]:not([value="Postobon"])').forEach(checkbox => {
+        checkbox.addEventListener('change', loadChart);
     });
 </script>
 
