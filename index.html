@@ -15,7 +15,7 @@
     <h1>Gráfica de Ingresos, EBITDA y Utilidad Neta</h1>
     
     <div id="controls">
-        <h2>Selecciona las Empresas</h2>
+        <h2>Selecciona la Empresa</h2>
         <div id="empresaCheckboxes"></div>
 
         <h2>Selecciona las Columnas</h2>
@@ -29,7 +29,7 @@
     <canvas id="myChart" width="400" height="200"></canvas>
 
     <script>
-        const url = 'https://raw.githubusercontent.com/ibidco/dashboard/main/datos.json';
+        const url = 'https://raw.githubusercontent.com/ibidco/dashboard/main/datos.json'; // Cambia esto
         let datos = [];
         let empresas = [];
         let periodos = [];
@@ -67,6 +67,7 @@
                 const checkbox = document.createElement('label');
                 checkbox.innerHTML = `<input type="checkbox" value="${empresa}" checked> ${empresa}`;
                 container.appendChild(checkbox);
+                container.appendChild(document.createElement('br')); // Añadir un salto de línea
             });
         }
 
