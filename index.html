@@ -3,73 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gráfica de Ingresos por Empresa y Periodo</title>
+    <title>Gráfica de Ingresos, EBITDA y Utilidad Neta</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        #controls {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Gráfica de Ingresos por Empresa y Periodo</h1>
+    <h1>Gráfica de Ingresos, EBITDA y Utilidad Neta</h1>
+    
+    <div id="controls">
+        <h2>Selecciona las Empresas</h2>
+        <div id="empresaCheckboxes"></div>
+
+        <h2>Selecciona las Columnas</h2>
+        <label><input type="checkbox" value="Ingresos" checked> Ingresos</label>
+        <label><input type="checkbox" value="EBITDA" checked> EBITDA</label>
+        <label><input type="checkbox" value="Utilidad neta" checked> Utilidad Neta</label>
+        
+        <button id="updateChart">Actualizar Gráfica</button>
+    </div>
+
     <canvas id="myChart" width="400" height="200"></canvas>
 
     <script>
         // URL del archivo JSON en GitHub
         const url = 'https://raw.githubusercontent.com/ibidco/dashboard/main/datos.json';
+        let datos = [];
+        let empresas = [];
+        let periodos = [];
 
         // Cargar los datos JSON
         fetch(url)
             .then(response => response.json())
-            .then(datos => {
-                // Agrupar datos por periodo y empresa
-                const empresas = [...new Set(datos.map(item => item.Empresa))];
-                const periodos = [...new Set(datos.map(item => item.Periodo))];
+            .then(data => {
+                datos = data;
+                empresas = [...new Set(datos.map(item => item.Empresa))];
+                periodos = [...new Set(datos.map(item => item.Periodo))];
+                renderEmpresaCheckboxes();
+                updateChart();
+            })
+            .catch(error => console.error('Error al cargar los datos:', error));
 
-                const ingresosPorPeriodo = {};
-                periodos.forEach(periodo => {
-                    ingresosPorPeriodo[periodo] = {};
-                    empresas.forEach(empresa => {
-                        const ingreso = datos.find(item => item.Periodo === periodo && item.Empresa === empresa);
-                        ingresosPorPeriodo[periodo][empresa] = ingreso ? ingreso.Ingresos : 0;
-                    });
+        function renderEmpresaCheckboxes() {
+            const container = document.getElementById('empresaCheckboxes');
+            empresas.forEach(empresa => {
+                const checkbox = document.createElement('label');
+                checkbox.innerHTML = `<input type="checkbox" value="${empresa}" checked> ${empresa}`;
+                container.appendChild(checkbox);
+            });
+        }
+
+        function updateChart() {
+            const selectedEmpresas = Array.from(document.querySelectorAll('#empresaCheckboxes input:checked')).map(checkbox => checkbox.value);
+            const selectedColumns = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(checkbox => checkbox.value);
+            
+            const ingresosPorPeriodo = {};
+            periodos.forEach(periodo => {
+                ingresosPorPeriodo[periodo] = {};
+                selectedEmpresas.forEach(empresa => {
+                    const ingreso = datos.find(item => item.Periodo === periodo && item.Empresa === empresa);
+                    ingresosPorPeriodo[periodo][empresa] = {
+                        Ingresos: ingreso ? ingreso.Ingresos : 0,
+                        EBITDA: ingreso ? ingreso.EBITDA : 0,
+                        'Utilidad neta': ingreso ? ingreso['Utilidad neta'] : 0
+                    };
                 });
+            });
 
-                // Preparar los datos para Chart.js
-                const labels = periodos;
-                const datasets = empresas.map(empresa => ({
-                    label: empresa,
-                    data: periodos.map(periodo => ingresosPorPeriodo[periodo][empresa]),
+            const labels = periodos;
+            const datasets = selectedEmpresas.flatMap(empresa => {
+                return selectedColumns.map(column => ({
+                    label: `${empresa} - ${column}`,
+                    data: periodos.map(periodo => ingresosPorPeriodo[periodo][empresa] ? ingresosPorPeriodo[periodo][empresa][column] : 0),
                     backgroundColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.5)`,
                     borderColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 1)`,
                     borderWidth: 1
                 }));
+            });
 
-                // Crear la gráfica
-                const ctx = document.getElementById('myChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: datasets
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Ingresos'
-                                }
-                            },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Periodo'
-                                }
+            const ctx = document.getElementById('myChart').getContext('2d');
+            if (window.myChart) {
+                window.myChart.destroy(); // Destruir el gráfico anterior
+            }
+            window.myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Valores'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Periodo'
                             }
                         }
                     }
-                });
-            })
-            .catch(error => console.error('Error al cargar los datos:', error));
+                }
+            });
+        }
+
+        document.getElementById('updateChart').addEventListener('click', updateChart);
     </script>
 </body>
 </html>
