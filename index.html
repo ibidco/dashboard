@@ -27,6 +27,20 @@
         label {
             margin-right: 10px;
         }
+
+        button {
+            padding: 10px 15px;
+            margin-top: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -47,7 +61,7 @@
     <canvas id="myChart" width="400" height="200"></canvas>
 
     <script>
-        const url = 'https://raw.githubusercontent.com/miperfil/mirepositorio/main/datos.json'; // Reemplaza con tu URL
+        const url = 'https://raw.githubusercontent.com/ibidco/dashboard/main/datos.json'; // Reemplaza con tu URL
         let datos = [];
         let empresas = [];
         let periodos = [];
@@ -81,10 +95,17 @@
             const container = document.getElementById('empresaCheckboxes');
             empresas.forEach(empresa => {
                 const checkbox = document.createElement('label');
-                checkbox.innerHTML = '<input type="checkbox" value="${empresa}" checked> ${empresa}';
+                checkbox.innerHTML = `<input type="checkbox" value="${empresa}" checked> ${empresa}`;
                 container.appendChild(checkbox);
                 container.appendChild(document.createElement('br'));
             });
+        }
+
+        function getRandomColor() {
+            const r = Math.floor(Math.random() * 255);
+            const g = Math.floor(Math.random() * 255);
+            const b = Math.floor(Math.random() * 255);
+            return `rgba(${r}, ${g}, ${b}, 0.5)`;
         }
 
         function updateChart() {
@@ -112,15 +133,14 @@
             const labels = periodos;
             const datasets = selectedEmpresas.flatMap(empresa => {
                 return selectedColumns.map(column => ({
-                    label: ${empresa} - ${column},
+                    label: `${empresa} - ${column}`,
                     data: periodos.map(periodo => ingresosPorPeriodo[periodo][empresa] ? ingresosPorPeriodo[periodo][empresa][column] : 0),
-                    backgroundColor: rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.5),
-                    borderColor: rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 1),
+                    backgroundColor: getRandomColor(),
+                    borderColor: getRandomColor(),
                     borderWidth: 1
                 }));
             });
 
-            // Filtrado de datasets para evitar duplicados
             const filteredDatasets = datasets.filter(dataset => dataset.data.some(value => value > 0));
 
             const ctx = document.getElementById('myChart').getContext('2d');
@@ -131,7 +151,7 @@
                 type: 'bar',
                 data: {
                     labels: labels,
-                    datasets: filteredDatasets // Usa el array filtrado
+                    datasets: filteredDatasets
                 },
                 options: {
                     responsive: true,
