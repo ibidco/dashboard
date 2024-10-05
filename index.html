@@ -29,7 +29,6 @@
     <canvas id="myChart" width="400" height="200"></canvas>
 
     <script>
-        // URL del archivo JSON en GitHub
         const url = 'https://raw.githubusercontent.com/ibidco/dashboard/main/datos.json';
         let datos = [];
         let empresas = [];
@@ -40,9 +39,23 @@
         fetch(url)
             .then(response => response.json())
             .then(data => {
-                datos = data;
-                empresas = [...new Set(datos.map(item => item.Empresa))];
-                periodos = [...new Set(datos.map(item => item.Periodo))];
+                // Convertir los datos en el formato adecuado
+                datos = data.map(item => ({
+                    empresa: item.Empresa,  // string
+                    periodo: item.Periodo,  // string
+                    año: item.Año,          // integer
+                    id: item.ID,            // string
+                    sector: item.Sector,    // string
+                    subsector: item.Subsector, // string
+                    ingresos: parseInt(item.Ingresos, 10), // integer
+                    costos: parseInt(item.Costos, 10), // integer
+                    utilidadBruta: parseInt(item["Utilidad bruta"], 10), // integer
+                    ebitda: parseFloat(item.EBITDA.replace(',', '.')), // float
+                    utilidadNeta: parseInt(item["Utilidad neta"], 10) // integer
+                }));
+                
+                empresas = [...new Set(datos.map(item => item.empresa))];
+                periodos = [...new Set(datos.map(item => item.periodo))];
                 renderEmpresaCheckboxes();
                 updateChart();
             })
@@ -65,11 +78,11 @@
             periodos.forEach(periodo => {
                 ingresosPorPeriodo[periodo] = {};
                 selectedEmpresas.forEach(empresa => {
-                    const ingreso = datos.find(item => item.Periodo === periodo && item.Empresa === empresa);
+                    const ingreso = datos.find(item => item.periodo === periodo && item.empresa === empresa);
                     ingresosPorPeriodo[periodo][empresa] = {
-                        Ingresos: ingreso ? ingreso.Ingresos : 0,
-                        EBITDA: ingreso ? ingreso.EBITDA : 0,
-                        'Utilidad neta': ingreso ? ingreso['Utilidad neta'] : 0
+                        Ingresos: ingreso ? ingreso.ingresos : 0,
+                        EBITDA: ingreso ? ingreso.ebitda : 0,
+                        'Utilidad neta': ingreso ? ingreso.utilidadNeta : 0
                     };
                 });
             });
