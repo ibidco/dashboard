@@ -24,6 +24,25 @@
             margin-bottom: 20px;
         }
 
+        .empresa-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .empresa-button:hover {
+            background-color: #0056b3;
+        }
+
+        .selected {
+            background-color: #0056b3; /* Color cuando el botón está activo */
+        }
+
         label {
             margin-right: 10px;
         }
@@ -34,7 +53,7 @@
     
     <div id="controls">
         <h2>Selecciona la Empresa</h2>
-        <div id="empresaCheckboxes"></div>
+        <div id="empresaButtons"></div>
 
         <h2>Selecciona las Columnas</h2>
         <label><input type="checkbox" value="Ingresos" checked> Ingresos</label>
@@ -72,26 +91,38 @@
 
                 empresas = [...new Set(datos.map(item => item.empresa))];
                 periodos = [...new Set(datos.map(item => item.periodo))];
-                renderEmpresaCheckboxes();
+                renderEmpresaButtons();
                 updateChart();
             })
             .catch(error => console.error('Error al cargar los datos:', error));
 
-        function renderEmpresaCheckboxes() {
-            const container = document.getElementById('empresaCheckboxes');
+        function renderEmpresaButtons() {
+            const container = document.getElementById('empresaButtons');
             empresas.forEach(empresa => {
-                const checkbox = document.createElement('label');
-                checkbox.innerHTML = `<input type="checkbox" value="${empresa}" checked> ${empresa}`;
-                container.appendChild(checkbox);
-                container.appendChild(document.createElement('br'));
+                const button = document.createElement('button');
+                button.className = 'empresa-button';
+                button.innerText = empresa;
+                button.onclick = () => toggleSelection(button, empresa);
+                container.appendChild(button);
             });
         }
 
+        const selectedEmpresas = new Set();
+
+        function toggleSelection(button, empresa) {
+            if (selectedEmpresas.has(empresa)) {
+                selectedEmpresas.delete(empresa);
+                button.classList.remove('selected');
+            } else {
+                selectedEmpresas.add(empresa);
+                button.classList.add('selected');
+            }
+        }
+
         function updateChart() {
-            const selectedEmpresas = Array.from(document.querySelectorAll('#empresaCheckboxes input:checked')).map(checkbox => checkbox.value);
             const selectedColumns = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(checkbox => checkbox.value);
             
-            if (selectedEmpresas.length === 0 || selectedColumns.length === 0) {
+            if (selectedEmpresas.size === 0 || selectedColumns.length === 0) {
                 alert('Por favor, selecciona al menos una empresa y una columna.');
                 return;
             }
@@ -110,7 +141,7 @@
             });
 
             const labels = periodos;
-            const datasets = selectedEmpresas.flatMap(empresa => {
+            const datasets = Array.from(selectedEmpresas).flatMap(empresa => {
                 return selectedColumns.map(column => ({
                     label: `${empresa} - ${column}`,
                     data: periodos.map(periodo => ingresosPorPeriodo[periodo][empresa] ? ingresosPorPeriodo[periodo][empresa][column] : 0),
