@@ -50,7 +50,7 @@
                     ingresos: parseInt(item.Ingresos, 10), // integer
                     costos: parseInt(item.Costos, 10), // integer
                     utilidadBruta: parseInt(item["Utilidad bruta"], 10), // integer
-                    ebitda: parseFloat(item.EBITDA.replace(',', '.')), // float
+                    ebitda: parseFloat(item.EBITDA.replace(',', '.')) || 0, // float
                     utilidadNeta: parseInt(item["Utilidad neta"], 10) // integer
                 }));
                 
