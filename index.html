@@ -34,6 +34,7 @@
         let datos = [];
         let empresas = [];
         let periodos = [];
+        let myChart; // Declarar la variable aquí
 
         // Cargar los datos JSON
         fetch(url)
@@ -85,10 +86,10 @@
             });
 
             const ctx = document.getElementById('myChart').getContext('2d');
-            if (window.myChart) {
-                window.myChart.destroy(); // Destruir el gráfico anterior
+            if (myChart) {
+                myChart.destroy(); // Destruir el gráfico anterior
             }
-            window.myChart = new Chart(ctx, {
+            myChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
