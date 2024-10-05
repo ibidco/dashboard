@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gráfica de Ingresos</title>
+    <title>Gráfica de Datos</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -19,7 +19,7 @@
 <body>
 
 <header>
-    <h1>Gráfica de Ingresos por Periodo y Empresa</h1>
+    <h1>Gráfica de Datos por Periodo y Empresa</h1>
 </header>
 
 <label for="empresaSelect">Selecciona una empresa:</label>
@@ -28,10 +28,18 @@
     <option value="Postobon">Postobon</option>
 </select>
 
-<canvas id="ingresosChart"></canvas>
+<div>
+    <h3>Selecciona las métricas:</h3>
+    <label><input type="checkbox" value="Ingresos" checked> Ingresos</label>
+    <label><input type="checkbox" value="Costos"> Costos</label>
+    <label><input type="checkbox" value="Utilidad bruta"> Utilidad bruta</label>
+    <label><input type="checkbox" value="EBITDA"> EBITDA</label>
+    <label><input type="checkbox" value="Utilidad neta"> Utilidad neta</label>
+</div>
+
+<canvas id="datosChart"></canvas>
 
 <script>
-    // Cambia la URL por la ruta correcta de tu archivo JSON
     const jsonDataUrl = "https://ibidco.github.io/dashboard/datos.json";
 
     // Función para cargar datos y crear la gráfica
@@ -44,28 +52,32 @@
                 return response.json();
             })
             .then(data => {
-                // Filtramos los datos por empresa
                 const filteredData = data.filter(d => d.Empresa === empresa);
-                const ingresos = filteredData.map(d => d.Ingresos);
                 const periodos = filteredData.map(d => d.Periodo);
+                
+                // Obtener las métricas seleccionadas
+                const selectedMetrics = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+                const datasets = selectedMetrics.map(metric => {
+                    return {
+                        label: metric,
+                        data: filteredData.map(d => d[metric]),
+                        backgroundColor: getRandomColor()
+                    };
+                });
 
-                const ctx = document.getElementById('ingresosChart').getContext('2d');
+                const ctx = document.getElementById('datosChart').getContext('2d');
 
                 // Limpiamos la gráfica anterior
-                if (window.ingresosChart) {
-                    window.ingresosChart.destroy();
+                if (window.datosChart) {
+                    window.datosChart.destroy();
                 }
 
                 // Creamos la nueva gráfica
-                window.ingresosChart = new Chart(ctx, {
+                window.datosChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: periodos,
-                        datasets: [{
-                            label: empresa,
-                            data: ingresos,
-                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                        }]
+                        datasets: datasets
                     },
                     options: {
                         scales: {
@@ -79,12 +91,29 @@
             .catch(error => console.error('Error al cargar los datos:', error));
     }
 
+    // Función para obtener colores aleatorios
+    function getRandomColor() {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
     // Cargar la gráfica inicial
     loadChart("Bavaria");
 
     // Cambiar la gráfica cuando se selecciona una empresa diferente
     document.getElementById('empresaSelect').addEventListener('change', (event) => {
         loadChart(event.target.value);
+    });
+
+    // Cambiar la gráfica cuando se seleccionan/deseleccionan métricas
+    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            loadChart(document.getElementById('empresaSelect').value);
+        });
     });
 </script>
 
