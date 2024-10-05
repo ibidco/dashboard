@@ -8,6 +8,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            text-align: center;
         }
         canvas {
             max-width: 600px;
@@ -21,54 +22,70 @@
     <h1>Gráfica de Ingresos por Periodo y Empresa</h1>
 </header>
 
+<label for="empresaSelect">Selecciona una empresa:</label>
+<select id="empresaSelect">
+    <option value="Bavaria">Bavaria</option>
+    <option value="Postobon">Postobon</option>
+</select>
+
 <canvas id="ingresosChart"></canvas>
 
 <script>
     // Cambia la URL por la ruta correcta de tu archivo JSON
-    fetch("https://ibidco.github.io/dashboard/datos.json")
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Error en la red: ' + response.statusText);
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Log para depuración
-            console.log(data);
+    const jsonDataUrl = "https://ibidco.github.io/dashboard/datos.json";
 
-            // Filtramos los datos por empresa y extraemos ingresos
-            const ingresosBavaria = data.filter(d => d.Empresa === "Bavaria").map(d => d.Ingresos);
-            const ingresosPostobon = data.filter(d => d.Empresa === "Postobon").map(d => d.Ingresos);
-            const periodos = data.map(d => d.Periodo);
+    // Función para cargar datos y crear la gráfica
+    function loadChart(empresa) {
+        fetch(jsonDataUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la red: ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Filtramos los datos por empresa
+                const filteredData = data.filter(d => d.Empresa === empresa);
+                const ingresos = filteredData.map(d => d.Ingresos);
+                const periodos = filteredData.map(d => d.Periodo);
 
-            const ctx = document.getElementById('ingresosChart').getContext('2d');
-            const ingresosChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: periodos,
-                    datasets: [
-                        {
-                            label: 'Bavaria',
-                            data: ingresosBavaria,
+                const ctx = document.getElementById('ingresosChart').getContext('2d');
+
+                // Limpiamos la gráfica anterior
+                if (window.ingresosChart) {
+                    window.ingresosChart.destroy();
+                }
+
+                // Creamos la nueva gráfica
+                window.ingresosChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: periodos,
+                        datasets: [{
+                            label: empresa,
+                            data: ingresos,
                             backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                        },
-                        {
-                            label: 'Postobon',
-                            data: ingresosPostobon,
-                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                        }
-                    ]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
                         }
                     }
-                }
-            });
-        })
-        .catch(error => console.error('Error al cargar los datos:', error));
+                });
+            })
+            .catch(error => console.error('Error al cargar los datos:', error));
+    }
+
+    // Cargar la gráfica inicial
+    loadChart("Bavaria");
+
+    // Cambiar la gráfica cuando se selecciona una empresa diferente
+    document.getElementById('empresaSelect').addEventListener('change', (event) => {
+        loadChart(event.target.value);
+    });
 </script>
 
 </body>
