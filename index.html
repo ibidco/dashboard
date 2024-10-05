@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gráfica de Ingresos, EBITDA y Utilidad Neta</title>
+    <title>Gráfica de Ingresos, EBITDA, Utilidad Neta, Margen EBITDA y Margen Neto</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -24,8 +24,33 @@
             margin-bottom: 20px;
         }
 
-        label {
-            margin-right: 10px;
+        .chip {
+            display: inline-block;
+            padding: 10px;
+            margin: 5px;
+            background-color: #ccc; /* Color gris por defecto */
+            color: black;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .chip.selected {
+            background-color: #007BFF; /* Color azul al seleccionar */
+            color: white;
+        }
+
+        .chart-container {
+            display: flex;
+            flex-direction: column; /* Cambiado a columna */
+            align-items: center; /* Centrar gráficos */
+            margin-top: 20px;
+        }
+
+        canvas {
+            width: 900px !important; /* Ancho al 80% del contenedor */
+            height: 500px !important; /* Altura fija para los gráficos */
+            margin-bottom: 20px; /* Espacio entre gráficos */
         }
 
         button {
@@ -44,28 +69,44 @@
     </style>
 </head>
 <body>
-    <h1>Gráfica de Ingresos, EBITDA y Utilidad Neta</h1>
+    <h1>Gráfica de Ingresos, EBITDA, Utilidad Neta, Margen EBITDA y Margen Neto</h1>
     
     <div id="controls">
         <h2>Selecciona la Empresa</h2>
-        <div id="empresaCheckboxes"></div>
-
-        <h2>Selecciona las Columnas</h2>
-        <label><input type="checkbox" value="Ingresos" checked> Ingresos</label>
-        <label><input type="checkbox" value="EBITDA" checked> EBITDA</label>
-        <label><input type="checkbox" value="Utilidad neta" checked> Utilidad Neta</label>
+        <div id="empresaChips"></div>
         
-        <button id="updateChart">Actualizar Gráfica</button>
+        <button id="updateChart">Actualizar Gráficas</button>
     </div>
 
-    <canvas id="myChart" width="400" height="200"></canvas>
+    <div class="chart-container">
+        <div>
+            <h3>Ingresos</h3>
+            <canvas id="ingresosChart"></canvas>
+        </div>
+        <div>
+            <h3>EBITDA</h3>
+            <canvas id="ebitdaChart"></canvas>
+        </div>
+        <div>
+            <h3>Utilidad Neta</h3>
+            <canvas id="utilidadNetaChart"></canvas>
+        </div>
+        <div>
+            <h3>Margen EBITDA</h3>
+            <canvas id="margenEbitdaChart"></canvas>
+        </div>
+        <div>
+            <h3>Margen Neto</h3>
+            <canvas id="margenNetoChart"></canvas>
+        </div>
+    </div>
 
     <script>
         const url = 'https://raw.githubusercontent.com/ibidco/dashboard/main/datos.json'; // Reemplaza con tu URL
         let datos = [];
         let empresas = [];
         let periodos = [];
-        let myChart;
+        let ingresosChart, ebitdaChart, utilidadNetaChart, margenEbitdaChart, margenNetoChart;
 
         fetch(url)
             .then(response => response.json())
@@ -86,72 +127,111 @@
 
                 empresas = [...new Set(datos.map(item => item.empresa))];
                 periodos = [...new Set(datos.map(item => item.periodo))];
-                renderEmpresaCheckboxes();
-                updateChart();
+                renderEmpresaChips();
+                updateCharts();
             })
             .catch(error => console.error('Error al cargar los datos:', error));
 
-        function renderEmpresaCheckboxes() {
-            const container = document.getElementById('empresaCheckboxes');
+        function renderEmpresaChips() {
+            const container = document.getElementById('empresaChips');
             empresas.forEach(empresa => {
-                const checkbox = document.createElement('label');
-                checkbox.innerHTML = `<input type="checkbox" value="${empresa}" checked> ${empresa}`;
-                container.appendChild(checkbox);
-                container.appendChild(document.createElement('br'));
+                const chip = document.createElement('div');
+                chip.className = 'chip';
+                chip.innerText = empresa;
+                chip.onclick = () => {
+                    chip.classList.toggle('selected');
+                };
+                container.appendChild(chip);
             });
         }
 
-        function getRandomColor() {
-            const r = Math.floor(Math.random() * 255);
-            const g = Math.floor(Math.random() * 255);
-            const b = Math.floor(Math.random() * 255);
-            return `rgba(${r}, ${g}, ${b}, 0.5)`;
+        function getSelectedEmpresas() {
+            const selectedChips = document.querySelectorAll('#empresaChips .chip.selected');
+            return Array.from(selectedChips).map(chip => chip.innerText);
         }
 
-        function updateChart() {
-            const selectedEmpresas = Array.from(document.querySelectorAll('#empresaCheckboxes input:checked')).map(checkbox => checkbox.value);
-            const selectedColumns = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(checkbox => checkbox.value);
-            
-            if (selectedEmpresas.length === 0 || selectedColumns.length === 0) {
-                alert('Por favor, selecciona al menos una empresa y una columna.');
+        function updateCharts() {
+            const selectedEmpresas = getSelectedEmpresas();
+
+            if (selectedEmpresas.length === 0) {
+                alert('Por favor, selecciona al menos una empresa.');
                 return;
             }
 
-            const ingresosPorPeriodo = {};
+            const ingresosData = [];
+            const ebitdaData = [];
+            const utilidadNetaData = [];
+            const margenEbitdaData = [];
+            const margenNetoData = [];
+
+            // Datos por periodo
             periodos.forEach(periodo => {
-                ingresosPorPeriodo[periodo] = {};
-                selectedEmpresas.forEach(empresa => {
+                const ingresoValues = selectedEmpresas.map(empresa => {
                     const ingreso = datos.find(item => item.periodo === periodo && item.empresa === empresa);
-                    ingresosPorPeriodo[periodo][empresa] = {
-                        Ingresos: ingreso ? ingreso.ingresos : 0,
-                        EBITDA: ingreso ? ingreso.ebitda : 0,
-                        'Utilidad neta': ingreso ? ingreso.utilidadNeta : 0
-                    };
+                    return ingreso ? ingreso.ingresos : 0;
                 });
+                const ebitdaValues = selectedEmpresas.map(empresa => {
+                    const ebitda = datos.find(item => item.periodo === periodo && item.empresa === empresa);
+                    return ebitda ? ebitda.ebitda : 0;
+                });
+                const utilidadNetaValues = selectedEmpresas.map(empresa => {
+                    const utilidadNeta = datos.find(item => item.periodo === periodo && item.empresa === empresa);
+                    return utilidadNeta ? utilidadNeta.utilidadNeta : 0;
+                });
+
+                // Calcular Margen EBITDA
+                const margenEbitdaValues = selectedEmpresas.map((empresa, index) => {
+                    return ingresoValues[index] !== 0 ? (ebitdaValues[index] / ingresoValues[index]) * 100 : 0; // Convertir a porcentaje
+                });
+
+                // Calcular Margen Neto
+                const margenNetoValues = selectedEmpresas.map((empresa, index) => {
+                    return ingresoValues[index] !== 0 ? (utilidadNetaValues[index] / ingresoValues[index]) * 100 : 0; // Convertir a porcentaje
+                });
+
+                ingresosData.push(ingresoValues);
+                ebitdaData.push(ebitdaValues);
+                utilidadNetaData.push(utilidadNetaValues);
+                margenEbitdaData.push(margenEbitdaValues);
+                margenNetoData.push(margenNetoValues);
             });
 
-            const labels = periodos;
-            const datasets = selectedEmpresas.flatMap(empresa => {
-                return selectedColumns.map(column => ({
-                    label: `${empresa} - ${column}`,
-                    data: periodos.map(periodo => ingresosPorPeriodo[periodo][empresa] ? ingresosPorPeriodo[periodo][empresa][column] : 0),
-                    backgroundColor: getRandomColor(),
-                    borderColor: getRandomColor(),
-                    borderWidth: 1
-                }));
-            });
+            const ctxIngresos = document.getElementById('ingresosChart').getContext('2d');
+            const ctxEbitda = document.getElementById('ebitdaChart').getContext('2d');
+            const ctxUtilidadNeta = document.getElementById('utilidadNetaChart').getContext('2d');
+            const ctxMargenEbitda = document.getElementById('margenEbitdaChart').getContext('2d');
+            const ctxMargenNeto = document.getElementById('margenNetoChart').getContext('2d');
 
-            const filteredDatasets = datasets.filter(dataset => dataset.data.some(value => value > 0));
+            if (ingresosChart) ingresosChart.destroy();
+            if (ebitdaChart) ebitdaChart.destroy();
+            if (utilidadNetaChart) utilidadNetaChart.destroy();
+            if (margenEbitdaChart) margenEbitdaChart.destroy();
+            if (margenNetoChart) margenNetoChart.destroy();
 
-            const ctx = document.getElementById('myChart').getContext('2d');
-            if (myChart) {
-                myChart.destroy();
-            }
-            myChart = new Chart(ctx, {
+            const colorPalette = [
+                '#FF5733', // Rojo
+                '#33FF57', // Verde
+                '#3357FF', // Azul
+                '#FF33A1', // Rosa
+                '#FFC300', // Amarillo
+                '#DAF7A6', // Verde claro
+                '#581845', // Púrpura
+                '#900C3F', // Burdeos
+                '#FFC300', // Amarillo
+                '#FF5733'  // Rojo
+            ];
+
+            ingresosChart = new Chart(ctxIngresos, {
                 type: 'bar',
                 data: {
-                    labels: labels,
-                    datasets: filteredDatasets
+                    labels: periodos,
+                    datasets: selectedEmpresas.map((empresa, index) => ({
+                        label: empresa,
+                        data: ingresosData.map(values => values[index]),
+                        backgroundColor: colorPalette[index % colorPalette.length],
+                        borderColor: '#000',
+                        borderWidth: 1
+                    }))
                 },
                 options: {
                     responsive: true,
@@ -160,13 +240,115 @@
                             beginAtZero: true,
                             title: {
                                 display: true,
-                                text: 'Valores'
+                                text: 'Ingresos'
                             }
-                        },
-                        x: {
+                        }
+                    }
+                }
+            });
+
+            ebitdaChart = new Chart(ctxEbitda, {
+                type: 'bar',
+                data: {
+                    labels: periodos,
+                    datasets: selectedEmpresas.map((empresa, index) => ({
+                        label: empresa,
+                        data: ebitdaData.map(values => values[index]),
+                        backgroundColor: colorPalette[index % colorPalette.length],
+                        borderColor: '#000',
+                        borderWidth: 1
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
                             title: {
                                 display: true,
-                                text: 'Periodo'
+                                text: 'EBITDA'
+                            }
+                        }
+                    }
+                }
+            });
+
+            utilidadNetaChart = new Chart(ctxUtilidadNeta, {
+                type: 'bar',
+                data: {
+                    labels: periodos,
+                    datasets: selectedEmpresas.map((empresa, index) => ({
+                        label: empresa,
+                        data: utilidadNetaData.map(values => values[index]),
+                        backgroundColor: colorPalette[index % colorPalette.length],
+                        borderColor: '#000',
+                        borderWidth: 1
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Utilidad Neta'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de Margen EBITDA en líneas
+            margenEbitdaChart = new Chart(ctxMargenEbitda, {
+                type: 'line',
+                data: {
+                    labels: periodos,
+                    datasets: selectedEmpresas.map((empresa, index) => ({
+                        label: empresa,
+                        data: margenEbitdaData.map(values => values[index]),
+                        backgroundColor: `rgba(${(index + 1) * 50}, 165, 255, 0.5)`,
+                        borderColor: colorPalette[index % colorPalette.length],
+                        borderWidth: 2,
+                        fill: false
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Margen EBITDA (%)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de Margen Neto
+            margenNetoChart = new Chart(ctxMargenNeto, {
+                type: 'line',
+                data: {
+                    labels: periodos,
+                    datasets: selectedEmpresas.map((empresa, index) => ({
+                        label: empresa,
+                        data: margenNetoData.map(values => values[index]),
+                        backgroundColor: `rgba(${(index + 1) * 50}, 165, 255, 0.5)`,
+                        borderColor: colorPalette[index % colorPalette.length],
+                        borderWidth: 2,
+                        fill: false
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Margen Neto (%)'
                             }
                         }
                     }
@@ -174,7 +356,7 @@
             });
         }
 
-        document.getElementById('updateChart').addEventListener('click', updateChart);
+        document.getElementById('updateChart').addEventListener('click', updateCharts);
     </script>
 </body>
 </html>
