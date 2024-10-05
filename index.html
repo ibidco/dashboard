@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gráfica de Ingresos</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Gráfica de Ingresos por Periodo y Empresa</h1>
+</header>
+
+<canvas id="ingresosChart"></canvas>
+
+<script>
+    fetch("https://ibidco.github.io/Dashboard/Cifras.json")
+        .then(response => response.json())
+        .then(data => {
+            const ingresosBavaria = data.filter(d => d.Empresa === "Bavaria").map(d => d.Ingresos);
+            const ingresosPostobon = data.filter(d => d.Empresa === "Postobon").map(d => d.Ingresos);
+            const periodos = data.map(d => d.Periodo);
+
+            const ctx = document.getElementById('ingresosChart').getContext('2d');
+            const ingresosChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: periodos,
+                    datasets: [
+                        {
+                            label: 'Bavaria',
+                            data: ingresosBavaria,
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        },
+                        {
+                            label: 'Postobon',
+                            data: ingresosPostobon,
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => console.error('Error al cargar los datos:', error));
+</script>
+
+</body>
+</html>
