@@ -42,6 +42,8 @@
 <script>
     const jsonDataUrl = "https://ibidco.github.io/dashboard/datos.json";
 
+    let datosChart; // Declarar la variable fuera de la función
+
     // Función para cargar datos y crear la gráfica
     function loadChart(empresa) {
         fetch(jsonDataUrl)
@@ -67,13 +69,13 @@
 
                 const ctx = document.getElementById('datosChart').getContext('2d');
 
-                // Limpiamos la gráfica anterior
-                if (window.datosChart) {
-                    window.datosChart.destroy();
+                // Limpiamos la gráfica anterior si existe
+                if (datosChart) {
+                    datosChart.destroy();
                 }
 
                 // Creamos la nueva gráfica
-                window.datosChart = new Chart(ctx, {
+                datosChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: periodos,
