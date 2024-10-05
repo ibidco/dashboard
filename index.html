@@ -24,24 +24,8 @@
             margin-bottom: 20px;
         }
 
-        button {
-            padding: 10px 15px;
-            margin: 5px;
-            border: none;
-            border-radius: 5px;
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        .empresa-button {
-            display: inline-block;
-            margin: 5px;
+        label {
+            margin-right: 10px;
         }
     </style>
 </head>
@@ -50,7 +34,7 @@
     
     <div id="controls">
         <h2>Selecciona la Empresa</h2>
-        <div id="empresaButtons"></div>
+        <div id="empresaCheckboxes"></div>
 
         <h2>Selecciona las Columnas</h2>
         <label><input type="checkbox" value="Ingresos" checked> Ingresos</label>
@@ -63,22 +47,15 @@
     <canvas id="myChart" width="400" height="200"></canvas>
 
     <script>
-        const url = 'C:\Users\felipe.agudelo\OneDrive - SURA INVESTMENTS\Ivan Felipe Agudelo - General\Sitio web\datos.json'; // Cambia a tu URL raw
+        const url = 'https://raw.githubusercontent.com/miperfil/mirepositorio/main/datos.json'; // Reemplaza con tu URL
         let datos = [];
         let empresas = [];
         let periodos = [];
         let myChart;
 
-        fetch('C:\Users\felipe.agudelo\OneDrive - SURA INVESTMENTS\Ivan Felipe Agudelo - General\Sitio web\datos.json')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Error al cargar el JSON');
-                }
-                return response.json();
-            })
+        fetch(url)
+            .then(response => response.json())
             .then(data => {
-                // Asegúrate de que la estructura de datos es la correcta
-                console.log(data);
                 datos = data.map(item => ({
                     empresa: item.Empresa,
                     periodo: item.Periodo,
@@ -95,40 +72,26 @@
 
                 empresas = [...new Set(datos.map(item => item.empresa))];
                 periodos = [...new Set(datos.map(item => item.periodo))];
-                renderEmpresaButtons();
+                renderEmpresaCheckboxes();
                 updateChart();
             })
             .catch(error => console.error('Error al cargar los datos:', error));
 
-        function renderEmpresaButtons() {
-            const container = document.getElementById('empresaButtons');
-            container.innerHTML = ''; // Limpiar el contenedor
+        function renderEmpresaCheckboxes() {
+            const container = document.getElementById('empresaCheckboxes');
             empresas.forEach(empresa => {
-                const button = document.createElement('button');
-                button.className = 'empresa-button';
-                button.innerText = empresa;
-                button.onclick = () => toggleEmpresa(empresa, button);
-                container.appendChild(button);
+                const checkbox = document.createElement('label');
+                checkbox.innerHTML = <input type="checkbox" value="${empresa}" checked> ${empresa};
+                container.appendChild(checkbox);
+                container.appendChild(document.createElement('br'));
             });
-            console.log('Empresas renderizadas:', empresas);
-        }
-
-        const selectedEmpresas = new Set();
-
-        function toggleEmpresa(empresa, button) {
-            if (selectedEmpresas.has(empresa)) {
-                selectedEmpresas.delete(empresa);
-                button.style.backgroundColor = '#007bff';
-            } else {
-                selectedEmpresas.add(empresa);
-                button.style.backgroundColor = '#0056b3';
-            }
         }
 
         function updateChart() {
+            const selectedEmpresas = Array.from(document.querySelectorAll('#empresaCheckboxes input:checked')).map(checkbox => checkbox.value);
             const selectedColumns = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(checkbox => checkbox.value);
             
-            if (selectedEmpresas.size === 0 || selectedColumns.length === 0) {
+            if (selectedEmpresas.length === 0 || selectedColumns.length === 0) {
                 alert('Por favor, selecciona al menos una empresa y una columna.');
                 return;
             }
@@ -147,12 +110,12 @@
             });
 
             const labels = periodos;
-            const datasets = Array.from(selectedEmpresas).flatMap(empresa => {
+            const datasets = selectedEmpresas.flatMap(empresa => {
                 return selectedColumns.map(column => ({
-                    label: `${empresa} - ${column}`,
+                    label: ${empresa} - ${column},
                     data: periodos.map(periodo => ingresosPorPeriodo[periodo][empresa] ? ingresosPorPeriodo[periodo][empresa][column] : 0),
-                    backgroundColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.5)`,
-                    borderColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 1)`,
+                    backgroundColor: rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.5),
+                    borderColor: rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 1),
                     borderWidth: 1
                 }));
             });
