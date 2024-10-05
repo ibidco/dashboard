@@ -24,8 +24,24 @@
             margin-bottom: 20px;
         }
 
-        label {
-            margin-right: 10px;
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .empresa-button {
+            display: inline-block;
+            margin: 5px;
         }
     </style>
 </head>
@@ -34,7 +50,7 @@
     
     <div id="controls">
         <h2>Selecciona la Empresa</h2>
-        <div id="empresaCheckboxes"></div>
+        <div id="empresaButtons"></div>
 
         <h2>Selecciona las Columnas</h2>
         <label><input type="checkbox" value="Ingresos" checked> Ingresos</label>
@@ -47,7 +63,7 @@
     <canvas id="myChart" width="400" height="200"></canvas>
 
     <script>
-        const url = 'https://raw.githubusercontent.com/ibidco/dashboard/main/datos.json'; // Reemplaza con tu URL
+        const url = 'https://raw.githubusercontent.com/ibidco/dashboard/main/datos.json'; // Cambia a tu URL raw
         let datos = [];
         let empresas = [];
         let periodos = [];
@@ -72,89 +88,23 @@
 
                 empresas = [...new Set(datos.map(item => item.empresa))];
                 periodos = [...new Set(datos.map(item => item.periodo))];
-                renderEmpresaCheckboxes();
+                renderEmpresaButtons();
                 updateChart();
             })
             .catch(error => console.error('Error al cargar los datos:', error));
 
-        function renderEmpresaCheckboxes() {
-            const container = document.getElementById('empresaCheckboxes');
+        function renderEmpresaButtons() {
+            const container = document.getElementById('empresaButtons');
             empresas.forEach(empresa => {
-                const checkbox = document.createElement('label');
-                checkbox.innerHTML = <input type="checkbox" value="${empresa}" checked> ${empresa};
-                container.appendChild(checkbox);
-                container.appendChild(document.createElement('br'));
+                const button = document.createElement('button');
+                button.className = 'empresa-button';
+                button.innerText = empresa;
+                button.onclick = () => toggleEmpresa(empresa, button);
+                container.appendChild(button);
             });
         }
 
-        function updateChart() {
-            const selectedEmpresas = Array.from(document.querySelectorAll('#empresaCheckboxes input:checked')).map(checkbox => checkbox.value);
-            const selectedColumns = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(checkbox => checkbox.value);
-            
-            if (selectedEmpresas.length === 0 || selectedColumns.length === 0) {
-                alert('Por favor, selecciona al menos una empresa y una columna.');
-                return;
-            }
+        const selectedEmpresas = new Set();
 
-            const ingresosPorPeriodo = {};
-            periodos.forEach(periodo => {
-                ingresosPorPeriodo[periodo] = {};
-                selectedEmpresas.forEach(empresa => {
-                    const ingreso = datos.find(item => item.periodo === periodo && item.empresa === empresa);
-                    ingresosPorPeriodo[periodo][empresa] = {
-                        Ingresos: ingreso ? ingreso.ingresos : 0,
-                        EBITDA: ingreso ? ingreso.ebitda : 0,
-                        'Utilidad neta': ingreso ? ingreso.utilidadNeta : 0
-                    };
-                });
-            });
-
-            const labels = periodos;
-            const datasets = selectedEmpresas.flatMap(empresa => {
-                return selectedColumns.map(column => ({
-                    label: ${empresa} - ${column},
-                    data: periodos.map(periodo => ingresosPorPeriodo[periodo][empresa] ? ingresosPorPeriodo[periodo][empresa][column] : 0),
-                    backgroundColor: rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.5),
-                    borderColor: rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 1),
-                    borderWidth: 1
-                }));
-            });
-
-            // Filtrado de datasets para evitar duplicados
-            const filteredDatasets = datasets.filter(dataset => dataset.data.some(value => value > 0));
-
-            const ctx = document.getElementById('myChart').getContext('2d');
-            if (myChart) {
-                myChart.destroy();
-            }
-            myChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: filteredDatasets // Usa el array filtrado
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Valores'
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Periodo'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        document.getElementById('updateChart').addEventListener('click', updateChart);
-    </script>
-</body>
-</html>
+        function toggleEmpresa(empresa, button) {
+            if (
