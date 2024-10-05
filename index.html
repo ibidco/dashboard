@@ -63,13 +63,13 @@
     <canvas id="myChart" width="400" height="200"></canvas>
 
     <script>
-        const url = 'https://raw.githubusercontent.com/ibidco/dashboard/main/datos.json'; // Cambia a tu URL raw
+        const url = 'C:\Users\felipe.agudelo\OneDrive - SURA INVESTMENTS\Ivan Felipe Agudelo - General\Sitio web\datos.json'; // Cambia a tu URL raw
         let datos = [];
         let empresas = [];
         let periodos = [];
         let myChart;
 
-        fetch(url)
+        fetch('C:\Users\felipe.agudelo\OneDrive - SURA INVESTMENTS\Ivan Felipe Agudelo - General\Sitio web\datos.json')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Error al cargar el JSON');
