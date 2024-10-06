@@ -1,0 +1,44 @@
+[
+    {
+        "empresa": "Bavaria",
+        "sector": "Consumo básico",
+        "subsector": "Bebidas",
+        "descripcion": "Cervecería Bavaria es una empresa colombiana de bebidas con sede en Bogotá, Colombia. Fue fundada el 4 de abril de 1889 por el inmigrante alemán Leo Siegfried Kopp. Pertenece hoy a la multinacional Anheuser-Busch InBev.",
+        "prob_default": "2%"
+    },
+    {
+        "empresa": "Postobon",
+        "sector": "Consumo básico",
+        "subsector": "Bebidas",
+        "descripcion": "Postobón es una empresa colombiana de bebidas azucaradas con sede en Medellín. Es una de las empresas más grandes de Colombia y una de las principales en América del Sur.",
+        "prob_default": "3%"
+    },
+    {
+        "empresa": "Familia",
+        "sector": "Consumo básico",
+        "subsector": "Papel",
+        "descripcion": "Grupo empresarial con presencia en Suramérica y el Caribe con más de 60 años de trayectoria, hacemos parte de Essity, compañía líder en higiene y salud a nivel global. Contamos con diez marcas líderes en los paises donde operamos. La sostenibilidad, la innovación, la transformación digital y nuestra cultura son habilitadores que nos permiten el cumplimiento de nuestro propósito superior.",
+        "prob_default": "3%"
+    },
+    {
+        "empresa": "Falabella",
+        "sector": "Consumo discrecional",
+        "subsector": "Retail",
+        "descripcion": "Falabella es una tienda por departamentos chilena fundada en 1889 por una familia italiana radicada en Chile, perteneciente al grupo del mismo nombre. Cuenta con más de 100 tiendas en Chile, Perú y Colombia, más de 30 marcas propias​ y 24 000 empleados. Se la considera la empresa de retail más grande y valiosa de América Latina.",
+        "prob_default": "5%"
+    },
+    {
+        "empresa": "Ecopetrol",
+        "sector": "Petróleo y Gas",
+        "subsector": "Integrada",
+        "descripcion": "Ecopetrol, antiguamente Empresa Colombiana de Petróleos S.A. es la principal empresa de petróleo de Colombia. Es la segunda empresa petrolera más grande de Latinoamérica.",
+        "prob_default": "2%"
+    },
+    {
+        "empresa": "Frontera",
+        "sector": "Petróleo y Gas",
+        "subsector": "Exploración",
+        "descripcion": "Frontera Energy es una compañía canadiense de exploración y producción de petróleo en el negocio de petróleo crudo pesado y gas natural.",
+        "prob_default": "8%"
+    }
+]
