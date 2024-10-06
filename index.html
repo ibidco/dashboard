@@ -3,314 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gráficos de Ingresos, EBITDA y Utilidad Neta</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Navbar y Selección de Empresas</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
         }
-
-        h1 {
+        .navbar {
+            background-color: #333;
+            overflow: hidden;
+        }
+        .navbar a {
+            float: left;
+            display: block;
+            color: white;
             text-align: center;
+            padding: 14px 20px;
+            text-decoration: none;
         }
-
-        #controls {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
+        .navbar a:hover {
+            background-color: #ddd;
+            color: black;
         }
-
         .chip {
             display: inline-block;
             padding: 10px;
             margin: 5px;
-            background-color: #ccc;
-            color: black;
+            background-color: #f1f1f1;
             border-radius: 16px;
             cursor: pointer;
-            transition: background-color 0.3s;
         }
-
         .chip.selected {
             background-color: #007BFF;
             color: white;
         }
-
-        .chart-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        .companies {
+            display: none;
             margin-top: 20px;
         }
-
-        canvas {
-            width: 900px; /* Change to percentage for better responsiveness */
-            height: 500px !important; /* Use consistent height */
-            margin-bottom: 20px;
-        }
-
-        button {
-            padding: 10px 15px;
-            margin-top: 10px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #0056b3;
+        .description {
+            margin-top: 20px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <h1>Gráficos de Ingresos, EBITDA y Utilidad Neta</h1>
-    
-    <div id="controls">
-        <h2>Selecciona el Sector</h2>
-        <div id="sectorChips"></div>
-        <h2>Selecciona la Empresa</h2>
-        <div id="empresaChips"></div>
-        
-        <button id="updateChart" disabled>Actualizar Gráficas</button>
+
+    <div class="navbar">
+        <a href="#home">Inicio</a>
+        <a href="#servicios">Servicios</a>
+        <a href="#sobre-nosotros">Sobre Nosotros</a>
+        <a href="#contacto">Contacto</a>
     </div>
 
-    <section class="chart-container" role="region" aria-label="Gráficos Financieros">
-        <h3>Ingresos</h3>
-        <canvas id="ingresosChart"></canvas>
+    <h2>Selecciona un Sector</h2>
+    <div id="sectors">
+        <div class="chip" data-sector="Consumo básico">Consumo básico</div>
+        <div class="chip" data-sector="Consumo discrecional">Consumo discrecional</div>
+        <div class="chip" data-sector="Petróleo y Gas">Petróleo y Gas</div>
+    </div>
 
-        <h3>EBITDA</h3>
-        <canvas id="ebitdaChart"></canvas>
+    <div id="companies" class="companies">
+        <h3>Empresas</h3>
+        <div id="empresa-list"></div>
+    </div>
 
-        <h3>Utilidad Neta</h3>
-        <canvas id="utilidadNetaChart"></canvas>
-
-        <h3>Cociente EBITDA/Ingresos</h3>
-        <canvas id="cocienteEbitdaIngresosChart"></canvas>
-
-        <h3>Cociente Utilidad Neta/Ingresos</h3>
-        <canvas id="cocienteUtilidadNetaIngresosChart"></canvas>
-    </section>
+    <div id="description" class="description"></div>
 
     <script>
-        const url = 'https://raw.githubusercontent.com/ibidco/dashboard/main/datos.json';
-        let datos = [];
-        let sectores = [];
-        let ingresosChart, ebitdaChart, utilidadNetaChart, cocienteEbitdaIngresosChart, cocienteUtilidadNetaIngresosChart;
+        // URL del archivo JSON en GitHub
+        const url = 'https://raw.githubusercontent.com/ibidco/dashboard/main/empresas.json';
 
         fetch(url)
             .then(response => {
-                if (!response.ok) throw new Error('Error al cargar los datos');
+                if (!response.ok) {
+                    throw new Error('Error al cargar los datos');
+                }
                 return response.json();
             })
-            .then(data => {
-                datos = data.map(item => ({
-                    empresa: item.Empresa,
-                    periodo: item.Periodo,
-                    ingresos: parseInt(item.Ingresos, 10) || 0,
-                    ebitda: parseFloat(item.EBITDA) || 0,
-                    utilidadNeta: parseInt(item["Utilidad neta"], 10) || 0,
-                    sector: item.Sector
-                }));
+            .then(empresas => {
+                document.querySelectorAll('.chip[data-sector]').forEach(chip => {
+                    chip.addEventListener('click', function() {
+                        const selectedSector = this.getAttribute('data-sector');
+                        document.querySelectorAll('.chip[data-sector]').forEach(c => c.classList.remove('selected'));
+                        this.classList.add('selected');
 
-                sectores = [...new Set(datos.map(item => item.sector))];
-                renderSectorChips();
-                updateEmpresaChips();
+                        const filteredCompanies = empresas.filter(e => e.sector === selectedSector);
+                        const empresaList = document.getElementById('empresa-list');
+                        empresaList.innerHTML = '';
+
+                        filteredCompanies.forEach(e => {
+                            const div = document.createElement('div');
+                            div.className = 'chip';
+                            div.textContent = e.empresa;
+                            div.addEventListener('click', () => showDescription(e.descripcion));
+                            empresaList.appendChild(div);
+                        });
+
+                        document.getElementById('companies').style.display = 'block';
+                        document.getElementById('description').innerHTML = ''; // Limpiar descripción
+                    });
+                });
             })
-            .catch(error => console.error('Error al cargar los datos:', error));
-
-        function renderSectorChips() {
-            const container = document.getElementById('sectorChips');
-            sectores.forEach(sector => {
-                const chip = document.createElement('div');
-                chip.className = 'chip';
-                chip.innerText = sector;
-                chip.onclick = () => {
-                    chip.classList.toggle('selected');
-                    updateEmpresaChips();
-                };
-                container.appendChild(chip);
-            });
-        }
-
-        function updateEmpresaChips() {
-            const selectedSectores = getSelectedSectores();
-            const container = document.getElementById('empresaChips');
-            container.innerHTML = '';
-
-            if (selectedSectores.length > 0) {
-                const empresasFiltradas = [...new Set(datos
-                    .filter(item => selectedSectores.includes(item.sector))
-                    .map(item => item.empresa))];
-
-                empresasFiltradas.forEach(empresa => {
-                    const chip = document.createElement('div');
-                    chip.className = 'chip';
-                    chip.innerText = empresa;
-                    chip.onclick = () => {
-                        chip.classList.toggle('selected');
-                        const selectedEmpresas = getSelectedEmpresas();
-                        document.getElementById('updateChart').disabled = selectedEmpresas.length === 0;
-                    };
-                    container.appendChild(chip);
-                });
-            }
-
-            document.getElementById('updateChart').disabled = selectedSectores.length === 0;
-        }
-
-        function getSelectedSectores() {
-            const selectedChips = document.querySelectorAll('#sectorChips .chip.selected');
-            return Array.from(selectedChips).map(chip => chip.innerText);
-        }
-
-        function getSelectedEmpresas() {
-            const selectedChips = document.querySelectorAll('#empresaChips .chip.selected');
-            return Array.from(selectedChips).map(chip => chip.innerText);
-        }
-
-        function updateCharts() {
-            const selectedEmpresas = getSelectedEmpresas();
-            if (selectedEmpresas.length === 0) {
-                alert('Por favor, selecciona al menos una empresa.');
-                return;
-            }
-
-            const ingresosData = {};
-            const ebitdaData = {};
-            const utilidadNetaData = {};
-            const periodosUnicos = [...new Set(datos.map(item => item.periodo))];
-
-            selectedEmpresas.forEach(empresa => {
-                ingresosData[empresa] = [];
-                ebitdaData[empresa] = [];
-                utilidadNetaData[empresa] = [];
-                
-                periodosUnicos.forEach(periodo => {
-                    const item = datos.find(d => d.periodo === periodo && d.empresa === empresa);
-                    ingresosData[empresa].push(item ? item.ingresos : 0);
-                    ebitdaData[empresa].push(item ? item.ebitda : 0);
-                    utilidadNetaData[empresa].push(item ? item.utilidadNeta : 0);
-                });
+            .catch(error => {
+                console.error('Hubo un problema con la carga del JSON:', error);
             });
 
-            const cocienteEbitdaIngresos = {};
-            const cocienteUtilidadNetaIngresos = {};
-
-            selectedEmpresas.forEach(empresa => {
-                cocienteEbitdaIngresos[empresa] = ebitdaData[empresa].map((value, index) => {
-                    return ingresosData[empresa][index] !== 0 ? (value / ingresosData[empresa][index]) * 100 : 0;
-                });
-
-                cocienteUtilidadNetaIngresos[empresa] = utilidadNetaData[empresa].map((value, index) => {
-                    return ingresosData[empresa][index] !== 0 ? (value / ingresosData[empresa][index]) * 100 : 0;
-                });
-            });
-
-            const ctxIngresos = document.getElementById('ingresosChart').getContext('2d');
-            const ctxEbitda = document.getElementById('ebitdaChart').getContext('2d');
-            const ctxUtilidadNeta = document.getElementById('utilidadNetaChart').getContext('2d');
-            const ctxCocienteEbitdaIngresos = document.getElementById('cocienteEbitdaIngresosChart').getContext('2d');
-            const ctxCocienteUtilidadNetaIngresos = document.getElementById('cocienteUtilidadNetaIngresosChart').getContext('2d');
-
-            if (ingresosChart) ingresosChart.destroy();
-            if (ebitdaChart) ebitdaChart.destroy();
-            if (utilidadNetaChart) utilidadNetaChart.destroy();
-            if (cocienteEbitdaIngresosChart) cocienteEbitdaIngresosChart.destroy();
-            if (cocienteUtilidadNetaIngresosChart) cocienteUtilidadNetaIngresosChart.destroy();
-
-            ingresosChart = createChart(ctxIngresos, 'bar', periodosUnicos, ingresosData);
-            ebitdaChart = createChart(ctxEbitda, 'bar', periodosUnicos, ebitdaData);
-            utilidadNetaChart = createChart(ctxUtilidadNeta, 'bar', periodosUnicos, utilidadNetaData);
-            cocienteEbitdaIngresosChart = createCocienteChart(ctxCocienteEbitdaIngresos, cocienteEbitdaIngresos, periodosUnicos, 'Cociente EBITDA/Ingresos (%)');
-            cocienteUtilidadNetaIngresosChart = createCocienteChart(ctxCocienteUtilidadNetaIngresos, cocienteUtilidadNetaIngresos, periodosUnicos, 'Cociente Utilidad Neta/Ingresos (%)');
+        function showDescription(desc) {
+            document.getElementById('description').textContent = desc;
         }
-
-        function createChart(ctx, type, labels, data) {
-            return new Chart(ctx, {
-                type: type,
-                data: {
-                    labels: labels,
-                    datasets: Object.keys(data).map(empresa => ({
-                        label: empresa,
-                        data: data[empresa],
-                        backgroundColor: getRandomColor(),
-                    }))
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: {
-                            ticks: {
-                                font: {
-                                    size: 30 // Tamaño del texto del eje X
-                                }
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                font: {
-                                    size: 30 // Tamaño del texto del eje Y
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function createCocienteChart(ctx, data, labels, labelPrefix) {
-            return new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: Object.keys(data).map(empresa => ({
-                        label: `${labelPrefix} ${empresa}`,
-                        data: data[empresa],
-                        borderColor: getRandomColor(),
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        fill: true,
-                    }))
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: {
-                            ticks: {
-                                font: {
-                                    size: 30 // Tamaño del texto del eje X
-                                }
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                font: {
-                                    size: 30 // Tamaño del texto del eje Y
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function getRandomColor() {
-            const letters = '0123456789ABCDEF';
-            let color = '#';
-            for (let i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
-            }
-            return color;
-        }
-
-        document.getElementById('updateChart').onclick = updateCharts;
     </script>
+
 </body>
 </html>
