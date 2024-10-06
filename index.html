@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gráfica de Ingresos, EBITDA, Utilidad Neta, Margen EBITDA y Margen Neto</title>
+    <title>Gráficos de Ingresos, EBITDA y Utilidad Neta</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -28,7 +28,7 @@
             display: inline-block;
             padding: 10px;
             margin: 5px;
-            background-color: #ccc; /* Color gris por defecto */
+            background-color: #ccc;
             color: black;
             border-radius: 16px;
             cursor: pointer;
@@ -36,21 +36,21 @@
         }
 
         .chip.selected {
-            background-color: #007BFF; /* Color azul al seleccionar */
+            background-color: #007BFF;
             color: white;
         }
 
         .chart-container {
             display: flex;
-            flex-direction: column; /* Cambiado a columna */
-            align-items: center; /* Centrar gráficos */
+            flex-direction: column;
+            align-items: center;
             margin-top: 20px;
         }
 
         canvas {
-            width: 900px !important; /* Ancho al 80% del contenedor */
-            height: 500px !important; /* Altura fija para los gráficos */
-            margin-bottom: 20px; /* Espacio entre gráficos */
+            width: 90%; /* Change to percentage for better responsiveness */
+            height: 400px !important; /* Use consistent height */
+            margin-bottom: 20px;
         }
 
         button {
@@ -69,80 +69,104 @@
     </style>
 </head>
 <body>
-    <h1>Gráfica de Ingresos, EBITDA, Utilidad Neta, Margen EBITDA y Margen Neto</h1>
+    <h1>Gráficos de Ingresos, EBITDA y Utilidad Neta</h1>
     
     <div id="controls">
+        <h2>Selecciona el Sector</h2>
+        <div id="sectorChips"></div>
         <h2>Selecciona la Empresa</h2>
         <div id="empresaChips"></div>
         
-        <button id="updateChart">Actualizar Gráficas</button>
+        <button id="updateChart" disabled>Actualizar Gráficas</button>
     </div>
 
-    <div class="chart-container">
-        <div>
-            <h3>Ingresos</h3>
-            <canvas id="ingresosChart"></canvas>
-        </div>
-        <div>
-            <h3>EBITDA</h3>
-            <canvas id="ebitdaChart"></canvas>
-        </div>
-        <div>
-            <h3>Utilidad Neta</h3>
-            <canvas id="utilidadNetaChart"></canvas>
-        </div>
-        <div>
-            <h3>Margen EBITDA</h3>
-            <canvas id="margenEbitdaChart"></canvas>
-        </div>
-        <div>
-            <h3>Margen Neto</h3>
-            <canvas id="margenNetoChart"></canvas>
-        </div>
-    </div>
+    <section class="chart-container" role="region" aria-label="Gráficos Financieros">
+        <h3>Ingresos</h3>
+        <canvas id="ingresosChart"></canvas>
+
+        <h3>EBITDA</h3>
+        <canvas id="ebitdaChart"></canvas>
+
+        <h3>Utilidad Neta</h3>
+        <canvas id="utilidadNetaChart"></canvas>
+
+        <h3>Cociente EBITDA/Ingresos</h3>
+        <canvas id="cocienteEbitdaIngresosChart"></canvas>
+
+        <h3>Cociente Utilidad Neta/Ingresos</h3>
+        <canvas id="cocienteUtilidadNetaIngresosChart"></canvas>
+    </section>
 
     <script>
-        const url = 'https://raw.githubusercontent.com/ibidco/dashboard/main/datos.json'; // Reemplaza con tu URL
+        const url = 'https://raw.githubusercontent.com/ibidco/dashboard/main/datos.json';
         let datos = [];
-        let empresas = [];
-        let periodos = [];
-        let ingresosChart, ebitdaChart, utilidadNetaChart, margenEbitdaChart, margenNetoChart;
+        let sectores = [];
+        let ingresosChart, ebitdaChart, utilidadNetaChart, cocienteEbitdaIngresosChart, cocienteUtilidadNetaIngresosChart;
 
         fetch(url)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error('Error al cargar los datos');
+                return response.json();
+            })
             .then(data => {
                 datos = data.map(item => ({
                     empresa: item.Empresa,
                     periodo: item.Periodo,
-                    año: item.Año,
-                    id: item.ID,
-                    sector: item.Sector,
-                    subsector: item.Subsector,
-                    ingresos: parseInt(item.Ingresos, 10),
-                    costos: parseInt(item.Costos, 10),
-                    utilidadBruta: parseInt(item["Utilidad bruta"], 10),
+                    ingresos: parseInt(item.Ingresos, 10) || 0,
                     ebitda: parseFloat(item.EBITDA) || 0,
-                    utilidadNeta: parseInt(item["Utilidad neta"], 10)
+                    utilidadNeta: parseInt(item["Utilidad neta"], 10) || 0,
+                    sector: item.Sector
                 }));
 
-                empresas = [...new Set(datos.map(item => item.empresa))];
-                periodos = [...new Set(datos.map(item => item.periodo))];
-                renderEmpresaChips();
-                updateCharts();
+                sectores = [...new Set(datos.map(item => item.sector))];
+                renderSectorChips();
+                updateEmpresaChips();
             })
             .catch(error => console.error('Error al cargar los datos:', error));
 
-        function renderEmpresaChips() {
-            const container = document.getElementById('empresaChips');
-            empresas.forEach(empresa => {
+        function renderSectorChips() {
+            const container = document.getElementById('sectorChips');
+            sectores.forEach(sector => {
                 const chip = document.createElement('div');
                 chip.className = 'chip';
-                chip.innerText = empresa;
+                chip.innerText = sector;
                 chip.onclick = () => {
                     chip.classList.toggle('selected');
+                    updateEmpresaChips();
                 };
                 container.appendChild(chip);
             });
+        }
+
+        function updateEmpresaChips() {
+            const selectedSectores = getSelectedSectores();
+            const container = document.getElementById('empresaChips');
+            container.innerHTML = '';
+
+            if (selectedSectores.length > 0) {
+                const empresasFiltradas = [...new Set(datos
+                    .filter(item => selectedSectores.includes(item.sector))
+                    .map(item => item.empresa))];
+
+                empresasFiltradas.forEach(empresa => {
+                    const chip = document.createElement('div');
+                    chip.className = 'chip';
+                    chip.innerText = empresa;
+                    chip.onclick = () => {
+                        chip.classList.toggle('selected');
+                        const selectedEmpresas = getSelectedEmpresas();
+                        document.getElementById('updateChart').disabled = selectedEmpresas.length === 0;
+                    };
+                    container.appendChild(chip);
+                });
+            }
+
+            document.getElementById('updateChart').disabled = selectedSectores.length === 0;
+        }
+
+        function getSelectedSectores() {
+            const selectedChips = document.querySelectorAll('#sectorChips .chip.selected');
+            return Array.from(selectedChips).map(chip => chip.innerText);
         }
 
         function getSelectedEmpresas() {
@@ -152,203 +176,88 @@
 
         function updateCharts() {
             const selectedEmpresas = getSelectedEmpresas();
-
             if (selectedEmpresas.length === 0) {
                 alert('Por favor, selecciona al menos una empresa.');
                 return;
             }
 
-            const ingresosData = [];
-            const ebitdaData = [];
-            const utilidadNetaData = [];
-            const margenEbitdaData = [];
-            const margenNetoData = [];
+            const ingresosData = {};
+            const ebitdaData = {};
+            const utilidadNetaData = {};
+            const periodosUnicos = [...new Set(datos.map(item => item.periodo))];
 
-            // Datos por periodo
-            periodos.forEach(periodo => {
-                const ingresoValues = selectedEmpresas.map(empresa => {
-                    const ingreso = datos.find(item => item.periodo === periodo && item.empresa === empresa);
-                    return ingreso ? ingreso.ingresos : 0;
+            selectedEmpresas.forEach(empresa => {
+                ingresosData[empresa] = [];
+                ebitdaData[empresa] = [];
+                utilidadNetaData[empresa] = [];
+                
+                periodosUnicos.forEach(periodo => {
+                    const item = datos.find(d => d.periodo === periodo && d.empresa === empresa);
+                    ingresosData[empresa].push(item ? item.ingresos : 0);
+                    ebitdaData[empresa].push(item ? item.ebitda : 0);
+                    utilidadNetaData[empresa].push(item ? item.utilidadNeta : 0);
                 });
-                const ebitdaValues = selectedEmpresas.map(empresa => {
-                    const ebitda = datos.find(item => item.periodo === periodo && item.empresa === empresa);
-                    return ebitda ? ebitda.ebitda : 0;
-                });
-                const utilidadNetaValues = selectedEmpresas.map(empresa => {
-                    const utilidadNeta = datos.find(item => item.periodo === periodo && item.empresa === empresa);
-                    return utilidadNeta ? utilidadNeta.utilidadNeta : 0;
-                });
+            });
 
-                // Calcular Margen EBITDA
-                const margenEbitdaValues = selectedEmpresas.map((empresa, index) => {
-                    return ingresoValues[index] !== 0 ? (ebitdaValues[index] / ingresoValues[index]) * 100 : 0; // Convertir a porcentaje
-                });
+            const cocienteEbitdaIngresos = {};
+            const cocienteUtilidadNetaIngresos = {};
 
-                // Calcular Margen Neto
-                const margenNetoValues = selectedEmpresas.map((empresa, index) => {
-                    return ingresoValues[index] !== 0 ? (utilidadNetaValues[index] / ingresoValues[index]) * 100 : 0; // Convertir a porcentaje
+            selectedEmpresas.forEach(empresa => {
+                cocienteEbitdaIngresos[empresa] = ebitdaData[empresa].map((value, index) => {
+                    return ingresosData[empresa][index] !== 0 ? (value / ingresosData[empresa][index]) * 100 : 0;
                 });
 
-                ingresosData.push(ingresoValues);
-                ebitdaData.push(ebitdaValues);
-                utilidadNetaData.push(utilidadNetaValues);
-                margenEbitdaData.push(margenEbitdaValues);
-                margenNetoData.push(margenNetoValues);
+                cocienteUtilidadNetaIngresos[empresa] = utilidadNetaData[empresa].map((value, index) => {
+                    return ingresosData[empresa][index] !== 0 ? (value / ingresosData[empresa][index]) * 100 : 0;
+                });
             });
 
             const ctxIngresos = document.getElementById('ingresosChart').getContext('2d');
             const ctxEbitda = document.getElementById('ebitdaChart').getContext('2d');
             const ctxUtilidadNeta = document.getElementById('utilidadNetaChart').getContext('2d');
-            const ctxMargenEbitda = document.getElementById('margenEbitdaChart').getContext('2d');
-            const ctxMargenNeto = document.getElementById('margenNetoChart').getContext('2d');
+            const ctxCocienteEbitdaIngresos = document.getElementById('cocienteEbitdaIngresosChart').getContext('2d');
+            const ctxCocienteUtilidadNetaIngresos = document.getElementById('cocienteUtilidadNetaIngresosChart').getContext('2d');
 
             if (ingresosChart) ingresosChart.destroy();
             if (ebitdaChart) ebitdaChart.destroy();
             if (utilidadNetaChart) utilidadNetaChart.destroy();
-            if (margenEbitdaChart) margenEbitdaChart.destroy();
-            if (margenNetoChart) margenNetoChart.destroy();
+            if (cocienteEbitdaIngresosChart) cocienteEbitdaIngresosChart.destroy();
+            if (cocienteUtilidadNetaIngresosChart) cocienteUtilidadNetaIngresosChart.destroy();
 
-            const colorPalette = [
-                '#FF5733', // Rojo
-                '#33FF57', // Verde
-                '#3357FF', // Azul
-                '#FF33A1', // Rosa
-                '#FFC300', // Amarillo
-                '#DAF7A6', // Verde claro
-                '#581845', // Púrpura
-                '#900C3F', // Burdeos
-                '#FFC300', // Amarillo
-                '#FF5733'  // Rojo
-            ];
+            ingresosChart = createChart(ctxIngresos, 'bar', periodosUnicos, ingresosData);
+            ebitdaChart = createChart(ctxEbitda, 'bar', periodosUnicos, ebitdaData);
+            utilidadNetaChart = createChart(ctxUtilidadNeta, 'bar', periodosUnicos, utilidadNetaData);
+            cocienteEbitdaIngresosChart = createCocienteChart(ctxCocienteEbitdaIngresos, cocienteEbitdaIngresos, periodosUnicos, 'Cociente EBITDA/Ingresos (%)');
+            cocienteUtilidadNetaIngresosChart = createCocienteChart(ctxCocienteUtilidadNetaIngresos, cocienteUtilidadNetaIngresos, periodosUnicos, 'Cociente Utilidad Neta/Ingresos (%)');
+        }
 
-            ingresosChart = new Chart(ctxIngresos, {
-                type: 'bar',
+        function createChart(ctx, type, labels, data) {
+            return new Chart(ctx, {
+                type: type,
                 data: {
-                    labels: periodos,
-                    datasets: selectedEmpresas.map((empresa, index) => ({
+                    labels: labels,
+                    datasets: Object.keys(data).map(empresa => ({
                         label: empresa,
-                        data: ingresosData.map(values => values[index]),
-                        backgroundColor: colorPalette[index % colorPalette.length],
-                        borderColor: '#000',
-                        borderWidth: 1
+                        data: data[empresa],
+                        backgroundColor: getRandomColor(),
                     }))
                 },
                 options: {
                     responsive: true,
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Ingresos'
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 20 // Tamaño del texto del eje X
+                                }
                             }
-                        }
-                    }
-                }
-            });
-
-            ebitdaChart = new Chart(ctxEbitda, {
-                type: 'bar',
-                data: {
-                    labels: periodos,
-                    datasets: selectedEmpresas.map((empresa, index) => ({
-                        label: empresa,
-                        data: ebitdaData.map(values => values[index]),
-                        backgroundColor: colorPalette[index % colorPalette.length],
-                        borderColor: '#000',
-                        borderWidth: 1
-                    }))
-                },
-                options: {
-                    responsive: true,
-                    scales: {
+                        },
                         y: {
                             beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'EBITDA'
-                            }
-                        }
-                    }
-                }
-            });
-
-            utilidadNetaChart = new Chart(ctxUtilidadNeta, {
-                type: 'bar',
-                data: {
-                    labels: periodos,
-                    datasets: selectedEmpresas.map((empresa, index) => ({
-                        label: empresa,
-                        data: utilidadNetaData.map(values => values[index]),
-                        backgroundColor: colorPalette[index % colorPalette.length],
-                        borderColor: '#000',
-                        borderWidth: 1
-                    }))
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Utilidad Neta'
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Gráfico de Margen EBITDA en líneas
-            margenEbitdaChart = new Chart(ctxMargenEbitda, {
-                type: 'line',
-                data: {
-                    labels: periodos,
-                    datasets: selectedEmpresas.map((empresa, index) => ({
-                        label: empresa,
-                        data: margenEbitdaData.map(values => values[index]),
-                        backgroundColor: `rgba(${(index + 1) * 50}, 165, 255, 0.5)`,
-                        borderColor: colorPalette[index % colorPalette.length],
-                        borderWidth: 2,
-                        fill: false
-                    }))
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Margen EBITDA (%)'
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Gráfico de Margen Neto
-            margenNetoChart = new Chart(ctxMargenNeto, {
-                type: 'line',
-                data: {
-                    labels: periodos,
-                    datasets: selectedEmpresas.map((empresa, index) => ({
-                        label: empresa,
-                        data: margenNetoData.map(values => values[index]),
-                        backgroundColor: `rgba(${(index + 1) * 50}, 165, 255, 0.5)`,
-                        borderColor: colorPalette[index % colorPalette.length],
-                        borderWidth: 2,
-                        fill: false
-                    }))
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Margen Neto (%)'
+                            ticks: {
+                                font: {
+                                    size: 20 // Tamaño del texto del eje Y
+                                }
                             }
                         }
                     }
@@ -356,7 +265,52 @@
             });
         }
 
-        document.getElementById('updateChart').addEventListener('click', updateCharts);
+        function createCocienteChart(ctx, data, labels, labelPrefix) {
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: Object.keys(data).map(empresa => ({
+                        label: `${labelPrefix} ${empresa}`,
+                        data: data[empresa],
+                        borderColor: getRandomColor(),
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        fill: true,
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 20 // Tamaño del texto del eje X
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                font: {
+                                    size: 20 // Tamaño del texto del eje Y
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        document.getElementById('updateChart').onclick = updateCharts;
     </script>
 </body>
 </html>
