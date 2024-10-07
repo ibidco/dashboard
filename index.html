@@ -171,7 +171,13 @@
             const empresasSelected = empresas.filter(emp => selectedEmpresas.includes(emp.empresa));
 
             if (empresasSelected.length > 0) {
-                document.getElementById('empresaDescription').innerHTML = empresasSelected.map(emp => `<strong>${emp.empresa}</strong>: ${emp.descripcion}`).join('<br>');
+                document.getElementById('empresaDescription').innerHTML = empresasSelected.map(emp => {
+                    return `
+                        <strong>Nombre:</strong> ${emp.empresa || 'No disponible'}<br>
+                        <strong>Descripción:</strong> ${emp.descripcion || 'No disponible'}<br>
+                        <strong>Probabilidad de Default:</strong> ${emp.prob_default || 'No disponible'}<br><br><br> <!-- Doble espacio -->
+                    `;
+                }).join('');
                 
                 // Hacer visible el contenedor de datos
                 document.getElementById('dataContainer').style.display = 'flex';
