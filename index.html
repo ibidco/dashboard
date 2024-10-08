@@ -18,7 +18,7 @@
             margin-bottom: 30px;
         }
         .filters {
-            width: 100%;
+            max-width: 1200px;
             padding: 20px;
             background-color: #ffffff;
             border-radius: 8px;
@@ -26,6 +26,7 @@
             margin-bottom: 20px;
             display: flex;
             justify-content: space-between; /* Para alinear las columnas */
+            margin: 20px auto; /* Para centrar el contenedor */
         }
         .filter-column {
             flex: 1; /* Cada columna ocupa el mismo espacio */
@@ -114,6 +115,9 @@
             <div class="chart-container">
                 <canvas id="utilidadNetaChart"></canvas>
             </div>
+            <div class="chart-container">
+                <canvas id="margenNetoChart"></canvas>
+            </div>
         </div>
     </div>
     
@@ -123,6 +127,7 @@
         let ingresosChart;
         let ebitdaChart;
         let utilidadNetaChart;
+        let margenNetoChart;
 
         async function fetchData() {
             const empresasResponse = await fetch('empresas.json');
@@ -171,20 +176,17 @@
             const empresasSelected = empresas.filter(emp => selectedEmpresas.includes(emp.empresa));
 
             if (empresasSelected.length > 0) {
-                document.getElementById('empresaDescription').innerHTML = empresasSelected.map(emp => {
-                    return `
-                        <strong>Nombre:</strong> ${emp.empresa || 'No disponible'}<br>
-                        <strong>Descripción:</strong> ${emp.descripcion || 'No disponible'}<br>
-                        <strong>Probabilidad de Default:</strong> ${emp.prob_default || 'No disponible'}<br><br><br> <!-- Doble espacio -->
-                    `;
-                }).join('');
-                
+                document.getElementById('empresaDescription').innerHTML = empresasSelected.map(emp => 
+                    `<strong>${emp.empresa}</strong>: ${emp.descripcion}<br><strong>Probabilidad de Default:</strong> ${emp.prob_default}<br><br>`
+                ).join('');
+
                 // Hacer visible el contenedor de datos
                 document.getElementById('dataContainer').style.display = 'flex';
 
                 createIngresosChart(datosFiltered, selectedEmpresas);
                 createEbitdaChart(datosFiltered, selectedEmpresas);
                 createUtilidadNetaChart(datosFiltered, selectedEmpresas);
+                createMargenNetoChart(datosFiltered, selectedEmpresas);
             }
         }
 
@@ -344,6 +346,63 @@
                                 display: true,
                                 text: 'Utilidad Neta'
                             }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createMargenNetoChart(datosFiltered, selectedEmpresas) {
+            const labels = [...new Set(datosFiltered.map(d => d.periodo))]; // Aseguramos etiquetas únicas
+            const datasets = selectedEmpresas.map(empresa => {
+                return {
+                    label: empresa,
+                    data: labels.map(label => {
+                        const entry = datosFiltered.find(d => d.periodo === label && d.empresa === empresa);
+                        const utilidadNeta = entry ? entry.utilidad_neta : 0;
+                        const ingresos = entry ? entry.ingresos : 0;
+                        return ingresos !== 0 ? (utilidadNeta / ingresos) * 100 : 0; // Devuelve 0 si los ingresos son 0
+                    }),
+                    borderColor: getRandomColor(),
+                    backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                    fill: true
+                };
+            });
+
+            // Destruir el gráfico anterior si existe
+            if (margenNetoChart) {
+                margenNetoChart.destroy();
+            }
+
+            const ctx = document.getElementById('margenNetoChart').getContext('2d');
+            margenNetoChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Margen Neto de las Empresas Seleccionadas (%)'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Período'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Margen Neto (%)'
+                            },
+                            suggestedMax: 20 // Suponiendo que el margen neto puede llegar hasta el 100%
                         }
                     }
                 }
