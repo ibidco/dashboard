@@ -422,10 +422,13 @@
                     label: empresa,
                     data: labels.map(label => {
                         const entry = datosFiltered.find(d => d.periodo === label && d.empresa === empresa);
-                        return entry ? entry.apalancamiento : 0;
+                        const deudaFinanciera = entry ? entry.deuda_financiera : 0;
+                        const efectivo = entry ? entry.efectivo : 0;
+                        const ebitda = entry ? entry.ebitda : 1; // Para evitar división por cero
+                        return ebitda !== 0 ? (deudaFinanciera - efectivo) / ebitda : 0; // Devuelve 0 si EBITDA es 0
                     }),
                     borderColor: getRandomColor(),
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
                     fill: true
                 };
             });
