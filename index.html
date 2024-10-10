@@ -188,7 +188,7 @@
 
             sectors.forEach(sector => {
                 const label = document.createElement('label');
-                label.innerHTML = <input type="checkbox" value="${sector}" onchange="populateEmpresaCheckboxes()"> ${sector};
+                label.innerHTML = '<input type="checkbox" value="${sector}" onchange="populateEmpresaCheckboxes()"> ${sector}';
                 sectorCheckboxes.appendChild(label);
             });
         }
@@ -206,7 +206,7 @@
 
             uniqueEmpresas.forEach(empresa => {
                 const label = document.createElement('label');
-                label.innerHTML = <input type="checkbox" value="${empresa}"> ${empresa};
+                label.innerHTML = '<input type="checkbox" value="${empresa}"> ${empresa}';
                 empresaCheckboxes.appendChild(label);
             });
         }
