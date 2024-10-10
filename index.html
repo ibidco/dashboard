@@ -25,11 +25,11 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
             display: flex;
-            justify-content: space-between; /* Para alinear las columnas */
-            margin: 20px auto; /* Para centrar el contenedor */
+            justify-content: space-between;
+            margin: 20px auto;
         }
         .filter-column {
-            flex: 1; /* Cada columna ocupa el mismo espacio */
+            flex: 1;
             padding: 10px;
         }
         .description {
@@ -77,7 +77,7 @@
             background-color: #0056b3;
         }
         .container {
-            display: none; /* Inicialmente oculto */
+            display: none;
             margin: auto;
             max-width: 1200px;
             border-radius: 8px;
@@ -118,6 +118,9 @@
             <div class="chart-container">
                 <canvas id="margenNetoChart"></canvas>
             </div>
+            <div class="chart-container">
+                <canvas id="apalancamientoChart"></canvas>
+            </div>
         </div>
     </div>
     
@@ -128,6 +131,7 @@
         let ebitdaChart;
         let utilidadNetaChart;
         let margenNetoChart;
+        let apalancamientoChart; // Nueva variable para el gráfico de apalancamiento
 
         async function fetchData() {
             const empresasResponse = await fetch('empresas.json');
@@ -152,13 +156,12 @@
 
         function populateEmpresaCheckboxes() {
             const empresaCheckboxes = document.getElementById('empresaCheckboxes');
-            empresaCheckboxes.innerHTML = ''; // Reset
+            empresaCheckboxes.innerHTML = '';
 
             const selectedSectors = [...document.querySelectorAll('input[type="checkbox"]:checked')].map(cb => cb.value);
             const filteredEmpresas = empresas.filter(emp => selectedSectors.includes(emp.sector));
             const filteredEmpresaNames = new Set(filteredEmpresas.map(emp => emp.empresa));
 
-            // Filtramos datos para solo incluir empresas que están en ambos archivos
             const validEmpresas = datos.filter(d => filteredEmpresaNames.has(d.empresa));
             const uniqueEmpresas = [...new Set(validEmpresas.map(d => d.empresa))];
 
@@ -180,24 +183,24 @@
                     `<strong>${emp.empresa}</strong>: ${emp.descripcion}<br><strong>Probabilidad de Default:</strong> ${emp.prob_default}<br><br>`
                 ).join('');
 
-                // Hacer visible el contenedor de datos
                 document.getElementById('dataContainer').style.display = 'flex';
 
                 createIngresosChart(datosFiltered, selectedEmpresas);
                 createEbitdaChart(datosFiltered, selectedEmpresas);
                 createUtilidadNetaChart(datosFiltered, selectedEmpresas);
                 createMargenNetoChart(datosFiltered, selectedEmpresas);
+                createApalancamientoChart(datosFiltered, selectedEmpresas); // Llamada al nuevo gráfico
             }
         }
 
         function createIngresosChart(datosFiltered, selectedEmpresas) {
-            const labels = [...new Set(datosFiltered.map(d => d.periodo))]; // Aseguramos etiquetas únicas
+            const labels = [...new Set(datosFiltered.map(d => d.periodo))];
             const datasets = selectedEmpresas.map(empresa => {
                 return {
                     label: empresa,
                     data: labels.map(label => {
                         const entry = datosFiltered.find(d => d.periodo === label && d.empresa === empresa);
-                        return entry ? entry.ingresos : 0; // Devuelve 0 si no hay datos
+                        return entry ? entry.ingresos : 0;
                     }),
                     borderColor: getRandomColor(),
                     backgroundColor: 'rgba(75, 192, 192, 0.2)',
@@ -205,7 +208,6 @@
                 };
             });
 
-            // Destruir el gráfico anterior si existe
             if (ingresosChart) {
                 ingresosChart.destroy();
             }
@@ -245,13 +247,13 @@
         }
 
         function createEbitdaChart(datosFiltered, selectedEmpresas) {
-            const labels = [...new Set(datosFiltered.map(d => d.periodo))]; // Aseguramos etiquetas únicas
+            const labels = [...new Set(datosFiltered.map(d => d.periodo))];
             const datasets = selectedEmpresas.map(empresa => {
                 return {
                     label: empresa,
                     data: labels.map(label => {
                         const entry = datosFiltered.find(d => d.periodo === label && d.empresa === empresa);
-                        return entry ? entry.ebitda : 0; // Devuelve 0 si no hay datos
+                        return entry ? entry.ebitda : 0;
                     }),
                     borderColor: getRandomColor(),
                     backgroundColor: 'rgba(153, 102, 255, 0.2)',
@@ -259,7 +261,6 @@
                 };
             });
 
-            // Destruir el gráfico anterior si existe
             if (ebitdaChart) {
                 ebitdaChart.destroy();
             }
@@ -299,21 +300,20 @@
         }
 
         function createUtilidadNetaChart(datosFiltered, selectedEmpresas) {
-            const labels = [...new Set(datosFiltered.map(d => d.periodo))]; // Aseguramos etiquetas únicas
+            const labels = [...new Set(datosFiltered.map(d => d.periodo))];
             const datasets = selectedEmpresas.map(empresa => {
                 return {
                     label: empresa,
                     data: labels.map(label => {
                         const entry = datosFiltered.find(d => d.periodo === label && d.empresa === empresa);
-                        return entry ? entry.utilidad_neta : 0; // Devuelve 0 si no hay datos
+                        return entry ? entry.utilidad_neta : 0;
                     }),
                     borderColor: getRandomColor(),
-                    backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                    backgroundColor: 'rgba(255, 206, 86, 0.2)',
                     fill: true
                 };
             });
 
-            // Destruir el gráfico anterior si existe
             if (utilidadNetaChart) {
                 utilidadNetaChart.destroy();
             }
@@ -353,23 +353,20 @@
         }
 
         function createMargenNetoChart(datosFiltered, selectedEmpresas) {
-            const labels = [...new Set(datosFiltered.map(d => d.periodo))]; // Aseguramos etiquetas únicas
+            const labels = [...new Set(datosFiltered.map(d => d.periodo))];
             const datasets = selectedEmpresas.map(empresa => {
                 return {
                     label: empresa,
                     data: labels.map(label => {
                         const entry = datosFiltered.find(d => d.periodo === label && d.empresa === empresa);
-                        const utilidadNeta = entry ? entry.utilidad_neta : 0;
-                        const ingresos = entry ? entry.ingresos : 0;
-                        return ingresos !== 0 ? (utilidadNeta / ingresos) * 100 : 0; // Devuelve 0 si los ingresos son 0
+                        return entry ? entry.margen_neto : 0;
                     }),
                     borderColor: getRandomColor(),
-                    backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
                     fill: true
                 };
             });
 
-            // Destruir el gráfico anterior si existe
             if (margenNetoChart) {
                 margenNetoChart.destroy();
             }
@@ -386,7 +383,7 @@
                     plugins: {
                         title: {
                             display: true,
-                            text: 'Margen Neto de las Empresas Seleccionadas (%)'
+                            text: 'Margen Neto de las Empresas Seleccionadas'
                         }
                     },
                     scales: {
@@ -400,9 +397,64 @@
                             beginAtZero: true,
                             title: {
                                 display: true,
-                                text: 'Margen Neto (%)'
-                            },
-                            suggestedMax: 20 // Suponiendo que el margen neto puede llegar hasta el 100%
+                                text: 'Margen Neto'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createApalancamientoChart(datosFiltered, selectedEmpresas) {
+            const labels = [...new Set(datosFiltered.map(d => d.periodo))];
+            const datasets = selectedEmpresas.map(empresa => {
+                return {
+                    label: empresa,
+                    data: labels.map(label => {
+                        const entry = datosFiltered.find(d => d.periodo === label && d.empresa === empresa);
+                        const deudaFinanciera = entry ? entry.deuda_financiera : 0;
+                        const efectivo = entry ? entry.efectivo : 0;
+                        const ebitda = entry ? entry.ebitda : 1; // Para evitar división por cero
+                        return ebitda !== 0 ? (deudaFinanciera - efectivo) / ebitda : 0; // Devuelve 0 si EBITDA es 0
+                    }),
+                    borderColor: getRandomColor(),
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    fill: true
+                };
+            });
+
+            if (apalancamientoChart) {
+                apalancamientoChart.destroy();
+            }
+
+            const ctx = document.getElementById('apalancamientoChart').getContext('2d');
+            apalancamientoChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Apalancamiento (Deuda Neta / EBITDA)'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Período'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Apalancamiento'
+                            }
                         }
                     }
                 }
