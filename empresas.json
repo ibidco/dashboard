@@ -1,74 +1,11 @@
-{
-    "empresas": [
-        {
-            "Empresa": "Bavaria",
-            "Sector": "Consumo básico",
-            "Subsector": "Bebidas",
-            "Descripción": "Cervecería Bavaria es una empresa colombiana de bebidas con sede en Bogotá, Colombia. Fue fundada el 4 de abril de 1889 por el inmigrante alemán Leo Siegfried Kopp. Pertenece hoy a la multinacional Anheuser-Busch InBev.",
-            "ProbDefault": 0.02
-        },
-        {
-            "Empresa": "Postobon",
-            "Sector": "Consumo básico",
-            "Subsector": "Bebidas",
-            "Descripción": "Postobón es una empresa colombiana de bebidas azucaradas con sede en Medellín. Es una de las empresas más grandes de Colombia y una de las principales en América del Sur.",
-            "ProbDefault": 0.03
-        },
-        {
-            "Empresa": "Familia",
-            "Sector": "Consumo básico",
-            "Subsector": "Consumo básico",
-            "Descripción": "Grupo empresarial con presencia en Suramérica y el Caribe con más de 60 años de trayectoria, hacemos parte de Essity, compañía líder en higiene y salud a nivel global. Contamos con diez marcas líderes en los países donde operamos. La sostenibilidad, la innovación, la transformación digital y nuestra cultura son habilitadores que nos permiten el cumplimiento de nuestro propósito superior.",
-            "ProbDefault": 0.03
-        },
-        {
-            "Empresa": "Falabella",
-            "Sector": "Consumo discrecional",
-            "Subsector": "Retail",
-            "Descripción": "Falabella es una tienda por departamentos chilena fundada en 1889 por una familia italiana radicada en Chile, perteneciente al grupo del mismo nombre. Cuenta con más de 100 tiendas en Chile, Perú y Colombia, más de 30 marcas propias y 24,000 empleados. Se la considera la empresa de retail más grande y valiosa de América Latina.",
-            "ProbDefault": 0.05
-        },
-        {
-            "Empresa": "Ecopetrol",
-            "Sector": "Oil & Gas",
-            "Subsector": "Petróleo",
-            "Descripción": "Ecopetrol, antiguamente Empresa Colombiana de Petróleos S.A. es la principal empresa de petróleo de Colombia. Es la segunda empresa petrolera más grande de Latinoamérica.",
-            "ProbDefault": 0.02
-        },
-        {
-            "Empresa": "Frontera",
-            "Sector": "Oil & Gas",
-            "Subsector": "Petróleo",
-            "Descripción": "Frontera Energy es una compañía canadiense de exploración y producción de petróleo en el negocio de petróleo crudo pesado y gas natural.",
-            "ProbDefault": 0.08
-        },
-        {
-            "Empresa": "Grupo Éxito",
-            "Sector": "Consumo discrecional",
-            "Subsector": "Retail",
-            "Descripción": "Grupo Éxito es una empresa conglomerado multinacional de origen colombiano. Nació en 1905 con la marca Carulla y desde 2024 sus dueños son el Grupo Calleja de origen salvadoreño.",
-            "ProbDefault": 0.01
-        },
-        {
-            "Empresa": "Bancolombia",
-            "Sector": "Financiero",
-            "Subsector": "Banco",
-            "Descripción": "Bancolombia S.A. (también conocido como Grupo Bancolombia; anteriormente: Banco de Colombia) es una institución financiera de servicio completo que brinda productos y servicios financieros en Colombia, Panamá, El Salvador, Puerto Rico, las Islas Caimán, Perú y Guatemala. Bancolombia es una de las seis empresas relacionadas con la banca del índice COLCAP. El Banco opera en nueve segmentos: Banca Colombia, Banca El Salvador, Arrendamiento, Fideicomiso, Inversión, Corretaje, Offshore, Pensiones y Seguros, y todos los demás segmentos.",
-            "ProbDefault": 0.02
-        },
-        {
-            "Empresa": "Davivienda",
-            "Sector": "Financiero",
-            "Subsector": "Banco",
-            "Descripción": "Davivienda es un banco colombiano fundado el 1 de septiembre de 1972 en Bogotá. La compañía brinda servicios financieros a personas, empresas y sectores rurales. Pertenece al Grupo Bolívar y es la tercera entidad de su tipo en el país.",
-            "ProbDefault": 0.05
-        },
-        {
-            "Empresa": "Papelera",
-            "Sector": "Consumo básico",
-            "Subsector": "Consumo básico",
-            "Descripción": "EcoPapel S.A. es una empresa líder en la industria papelera, comprometida con la sostenibilidad y la innovación. Fundada en [año de fundación], nuestra misión es ofrecer productos de papel de alta calidad mientras minimizamos el impacto ambiental. Nos especializamos en la producción de papel reciclado y productos de papel certificados, utilizando tecnología avanzada y procesos ecológicos. Nuestro portafolio incluye papel para impresión, cartón, y soluciones personalizadas para empresas de diversos sectores, como la educación, la publicidad y la industria.",
-            "ProbDefault": 0.1
-        }
-    ]
-}
+{"empresas": [{"Empresa":"Bavaria","Sector":"Consumo básico","Subsector":"Bebidas","Descripción":"Cervecería Bavaria es una empresa colombiana de bebidas con sede en Bogotá, Colombia. Fue fundada el 4 de abril de 1889 por el inmigrante alemán Leo Siegfried Kopp. Pertenece hoy a la multinacional Anheuser-Busch InBev.","Prob Default":0.02},
+{"empresa":"Postobon","sector":"Consumo básico","Subsector":"Bebidas","Descripción":"Postobón es una empresa colombiana de bebidas azucaradas con sede en Medellín. Es una de las empresas más grandes de Colombia y una de las principales en América del Sur.","Prob Default":0.03},
+{"empresa":"Familia","sector":"Consumo básico","Subsector":"Retail","Descripción":"Grupo empresarial con presencia en Suramérica y el Caribe con más de 60 años de trayectoria, hacemos parte de Essity, compañía líder en higiene y salud a nivel global. Contamos con diez marcas líderes en los paises donde operamos. La sostenibilidad, la innovación, la transformación digital y nuestra cultura son habilitadores que nos permiten el cumplimiento de nuestro propósito superior.","Prob Default":0.03},
+{"empresa":"Falabella","sector":"Consumo discrecional","Subsector":"Retail","Descripción":"Falabella es una tienda por departamentos chilena fundada en 1889 por una familia italiana radicada en Chile, perteneciente al grupo del mismo nombre. Cuenta con más de 100 tiendas en Chile, Perú y Colombia, más de 30 marcas propias y 24 000 empleados. Se la considera la empresa de retail más grande y valiosa de América Latina.","Prob Default":0.05},
+{"empresa":"Ecopetrol","sector":"Oil & Gas","Subsector":"Petróleo","Descripción":"Ecopetrol, antiguamente Empresa Colombiana de Petróleos S.A. es la principal empresa de petróleo de Colombia. Es la segunda empresa petrolera más grande de Latinoamérica.","Prob Default":0.02},
+{"empresa":"Frontera","sector":"Oil & Gas","Subsector":"Petróleo","Descripción":"Frontera Energy es una compañía canadiense de exploración y producción de petróleo en el negocio de petróleo crudo pesado y gas natural.","Prob Default":0.08},
+{"empresa":"Grupo Éxito","sector":"Consumo discrecional","Subsector":"Retail","Descripción":"Grupo Éxito es una empresa conglomerado multinacional de origen colombiano. Nació en 1905 con la marca Carulla y desde 2024 sus dueños son el Grupo Calleja de origen salvadoreño.","Prob Default":0.01},
+{"empresa":"Bancolombia","sector":"Financiero","Subsector":"Banco","Descripción":"Bancolombia S.A. (también conocido como Grupo Bancolombia; anteriormente: Banco de Colombia) es una institución financiera de servicio completo que brinda productos y servicios financieros en Colombia, Panamá, El Salvador, Puerto Rico, las Islas Caimán, Perú y Guatemala. Bancolombia es una de las seis empresas relacionadas con la banca del índice COLCAP. El Banco opera en nueve segmentos: Banca Colombia, Banca El Salvador, Arrendamiento, Fideicomiso, Inversión, Corretaje, Offshore, Pensiones y Seguros, y todos los demás segmentos.","Prob Default":0.02},
+{"empresa":"Davivienda","sector":"Financiero","Subsector":"Banco","Descripción":"Davivienda es un banco colombiano fundado el 1 de septiembre de 1972 en Bogotá. La compañía brinda servicios financieros a personas, empresas y sectores rurales. Pertenece al Grupo Bolívar y es la tercera entidad de su tipo en el país.","Prob Default":0.05},
+{"empresa":"Papelera","sector":"Consumo básico","Subsector":"Retail","Descripción":"EcoPapel S.A. es una empresa líder en la industria papelera, comprometida con la sostenibilidad y la innovación. Fundada en 1980, nuestra misión es ofrecer productos de papel de alta calidad mientras minimizamos el impacto ambiental.\n\nNos especializamos en la producción de papel reciclado y productos de papel certificados, utilizando tecnología avanzada y procesos ecológicos. Nuestro portafolio incluye papel para impresión, cartón, y soluciones personalizadas para empresas de diversos sectores, como la educación, la publicidad y la industria.","Prob Default":0.1}
+]}
