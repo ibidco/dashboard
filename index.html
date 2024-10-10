@@ -83,6 +83,23 @@
             border-radius: 8px;
             overflow: hidden;
         }
+
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column; /* Cambia la dirección a columna */
+            }
+            .container {
+                flex-direction: column; /* Cambia la dirección a columna */
+            }
+            .description {
+                width: 100%; /* Ancho completo para la descripción */
+                margin-right: 0; /* Elimina el margen derecho */
+                margin-bottom: 20px; /* Añade un margen inferior */
+            }
+            .charts {
+                width: 100%; /* Ancho completo para los gráficos */
+            }
+        }
     </style>
 </head>
 <body>
@@ -131,7 +148,7 @@
         let ebitdaChart;
         let utilidadNetaChart;
         let margenNetoChart;
-        let apalancamientoChart; // Nueva variable para el gráfico de apalancamiento
+        let apalancamientoChart;
 
         async function fetchData() {
             const empresasResponse = await fetch('empresas.json');
@@ -189,7 +206,7 @@
                 createEbitdaChart(datosFiltered, selectedEmpresas);
                 createUtilidadNetaChart(datosFiltered, selectedEmpresas);
                 createMargenNetoChart(datosFiltered, selectedEmpresas);
-                createApalancamientoChart(datosFiltered, selectedEmpresas); // Llamada al nuevo gráfico
+                createApalancamientoChart(datosFiltered, selectedEmpresas);
             }
         }
 
@@ -362,7 +379,6 @@
                         const utilidadNeta = entry ? entry.utilidad_neta : 0;
                         const ingresos = entry ? entry.ingresos : 1; // Para evitar división por cero
                         return ingresos !== 0 ? utilidadNeta / ingresos : 0; // Devuelve 0 si los ingresos son 0
-
                     }),
                     borderColor: getRandomColor(),
                     backgroundColor: 'rgba(75, 192, 192, 0.2)',
