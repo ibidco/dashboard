@@ -15,6 +15,28 @@
             flex-direction: column;
             align-items: center; /* Centrar el contenido */
         }
+        nav {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+        }
+        nav h1 {
+            margin: 0;
+            flex-grow: 1;
+        }
+        nav input[type="text"] {
+            padding: 5px;
+            margin-right: 10px;
+        }
+        nav button {
+            padding: 5px 10px;
+        }
+        .button-container {
+            margin: 20px;
+            text-align: center;
+        }
         h1 {
             text-align: center;
             color: #4A4A4A;
@@ -47,11 +69,11 @@
             margin-bottom: 20px;
         }
         .chart-container {
-            margin-bottom: 30px;
-            position: relative;
-            width: 100%;
-            /* padding-top: 100%; /* Mantiene la proporción 1:1 */
-            overflow: hidden;
+             margin-bottom: 30px;
+            height: 400px; /* Ajustar la altura del gráfico */
+            display: flex; /* Hacer flex el contenedor */
+            justify-content: center; /* Centrar contenido horizontalmente */
+            align-items: center; /* Centrar contenido verticalmente */
         }
         .checkbox-group {
             margin-bottom: 10px;
@@ -86,13 +108,7 @@
             border-radius: 8px;
             overflow: hidden;
         }
-        canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
+
         @media (max-width: 768px) {
             .filters {
                 flex-direction: column; /* Apilar columnas verticalmente en pantallas pequeñas */
@@ -102,8 +118,8 @@
     </style>
 </head>
 <body>
-    
-    <nav>
+
+     <nav>
         <h1>Research</h1>
         <input type="text" placeholder="Buscar...">
         <button type="button">Buscar</button>
@@ -172,7 +188,7 @@
 
             sectors.forEach(sector => {
                 const label = document.createElement('label');
-                label.innerHTML = `<input type="checkbox" value="${sector}" onchange="populateEmpresaCheckboxes()"> ${sector}`;
+                label.innerHTML = <input type="checkbox" value="${sector}" onchange="populateEmpresaCheckboxes()"> ${sector};
                 sectorCheckboxes.appendChild(label);
             });
         }
@@ -190,7 +206,7 @@
 
             uniqueEmpresas.forEach(empresa => {
                 const label = document.createElement('label');
-                label.innerHTML = `<input type="checkbox" value="${empresa}"> ${empresa}`;
+                label.innerHTML = <input type="checkbox" value="${empresa}"> ${empresa};
                 empresaCheckboxes.appendChild(label);
             });
         }
@@ -203,7 +219,7 @@
 
             if (empresasSelected.length > 0) {
                 document.getElementById('empresaDescription').innerHTML = empresasSelected.map(emp => 
-                    `<strong>${emp.empresa}</strong>: ${emp.descripcion}<br><strong>Probabilidad de Default:</strong> ${emp.prob_default}<br><br>`
+                    <strong>${emp.empresa}</strong>: ${emp.descripcion}<br><strong>Probabilidad de Default:</strong> ${emp.prob_default}<br><br>
                 ).join('');
 
                 document.getElementById('dataContainer').style.display = 'flex';
