@@ -48,10 +48,10 @@
         }
         .chart-container {
             margin-bottom: 30px;
-            height: 400px; /* Ajustar la altura del gráfico */
-            display: flex; /* Hacer flex el contenedor */
-            justify-content: center; /* Centrar contenido horizontalmente */
-            align-items: center; /* Centrar contenido verticalmente */
+            position: relative;
+            width: 100%;
+            padding-top: 100%; /* Mantiene la proporción 1:1 */
+            overflow: hidden;
         }
         .checkbox-group {
             margin-bottom: 10px;
