@@ -28,14 +28,6 @@
         nav button {
             padding: 5px 10px;
         }
-        .button-container {
-            margin: 20px;
-            text-align: center;
-        }
-        .button-container button {
-            padding: 10px 20px;
-            margin: 10px;
-        }
         footer {
             text-align: center;
             color: gray;
@@ -59,12 +51,7 @@
     <nav>
         <h1>Research</h1>
         <input type="text" placeholder="Buscar...">
-        <button type="button">Buscar</button>
     </nav>
-
-    <div class="button-container">
-        <button id="loadData">Cargar Datos</button>
-    </div>
 
     <div id="checkbox-container"></div>
     <div id="data-container"></div>
@@ -74,7 +61,8 @@
     </footer>
 
     <script>
-        document.getElementById('loadData').addEventListener('click', () => {
+        // Cargar los datos del JSON al cargar la página
+        window.onload = () => {
             fetch('bancos.json')
                 .then(response => response.json())
                 .then(data => {
@@ -96,11 +84,11 @@
                         checkboxContainer.appendChild(document.createElement('br'));
                     });
 
-                    // Opcional: cargar datos automáticamente
+                    // Cargar datos automáticamente
                     displayBankData(data);
                 })
                 .catch(error => console.error('Error al cargar el JSON:', error));
-        });
+        };
 
         function displayBankData(data) {
             const container = document.getElementById('data-container');
