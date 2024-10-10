@@ -25,9 +25,6 @@
             padding: 5px;
             margin-right: 10px;
         }
-        nav button {
-            padding: 5px 10px;
-        }
         footer {
             text-align: center;
             color: gray;
@@ -69,15 +66,18 @@
                     const checkboxContainer = document.getElementById('checkbox-container');
                     checkboxContainer.innerHTML = '<h2>Selecciona Bancos</h2>';
 
-                    data.forEach(banco => {
+                    // Usar un Set para asegurar nombres únicos
+                    const uniqueBancos = new Set(data.map(banco => banco.Banco));
+
+                    uniqueBancos.forEach(banco => {
                         const checkbox = document.createElement('input');
                         checkbox.type = 'checkbox';
-                        checkbox.id = banco.Banco;
-                        checkbox.value = banco.Banco;
+                        checkbox.id = banco;
+                        checkbox.value = banco;
 
                         const label = document.createElement('label');
-                        label.htmlFor = banco.Banco;
-                        label.appendChild(document.createTextNode(banco.Banco));
+                        label.htmlFor = banco;
+                        label.appendChild(document.createTextNode(banco));
 
                         checkboxContainer.appendChild(checkbox);
                         checkboxContainer.appendChild(label);
