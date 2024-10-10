@@ -49,6 +49,9 @@
         #data-container {
             margin: 20px;
         }
+        #checkbox-container {
+            margin: 20px;
+        }
     </style>
 </head>
 <body>
@@ -63,6 +66,7 @@
         <button id="loadData">Cargar Datos</button>
     </div>
 
+    <div id="checkbox-container"></div>
     <div id="data-container"></div>
 
     <footer>
@@ -74,17 +78,40 @@
             fetch('bancos.json')
                 .then(response => response.json())
                 .then(data => {
-                    const container = document.getElementById('data-container');
-                    container.innerHTML = '<h2>Datos de Bancos</h2>';
+                    const checkboxContainer = document.getElementById('checkbox-container');
+                    checkboxContainer.innerHTML = '<h2>Selecciona Bancos</h2>';
+
                     data.forEach(banco => {
-                        let bankInfo = `<h3>${banco.Banco}</h3>
-                                        <p>Indicador: ${banco.Indicador}</p>
-                                        <p>Tipo: ${banco.Tipo}</p>`;
-                        container.innerHTML += bankInfo;
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.id = banco.Banco;
+                        checkbox.value = banco.Banco;
+
+                        const label = document.createElement('label');
+                        label.htmlFor = banco.Banco;
+                        label.appendChild(document.createTextNode(banco.Banco));
+
+                        checkboxContainer.appendChild(checkbox);
+                        checkboxContainer.appendChild(label);
+                        checkboxContainer.appendChild(document.createElement('br'));
                     });
+
+                    // Opcional: cargar datos automáticamente
+                    displayBankData(data);
                 })
                 .catch(error => console.error('Error al cargar el JSON:', error));
         });
+
+        function displayBankData(data) {
+            const container = document.getElementById('data-container');
+            container.innerHTML = '<h2>Datos de Bancos</h2>';
+            data.forEach(banco => {
+                let bankInfo = `<h3>${banco.Banco}</h3>
+                                <p>Indicador: ${banco.Indicador}</p>
+                                <p>Tipo: ${banco.Tipo}</p>`;
+                container.innerHTML += bankInfo;
+            });
+        }
     </script>
 
 </body>
