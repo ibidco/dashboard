@@ -50,10 +50,6 @@
             margin-bottom: 30px;
             height: 400px; /* Ajustar la altura de los gráficos */
         }
-        canvas {
-            width: 99% !important; /* Asegurarse de que el canvas llene el contenedor */
-            height: 99% !important; /* Asegurarse de que el canvas llene el contenedor */
-        }
         .checkbox-group {
             margin-bottom: 10px;
         }
@@ -371,7 +367,9 @@
                     label: empresa,
                     data: labels.map(label => {
                         const entry = datosFiltered.find(d => d.periodo === label && d.empresa === empresa);
-                        return entry ? entry.margen_neto : 0;
+                        const utilidadNeta = entry ? entry.utilidad_neta : 0;
+                        const ingresos = entry ? entry.ingresos : 1; // Para evitar división por cero
+                        return ingresos !== 0 ? utilidadNeta / ingresos : 0; // Devuelve 0 si los ingresos son 0
                     }),
                     borderColor: getRandomColor(),
                     backgroundColor: 'rgba(75, 192, 192, 0.2)',
